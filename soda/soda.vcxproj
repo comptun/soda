@@ -25,6 +25,7 @@
     <ClCompile Include="Token.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="TokenTypes.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Soda.h" />
     <ClInclude Include="Token.h" />

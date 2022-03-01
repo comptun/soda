@@ -3,6 +3,5 @@
 int main()
 {
 	sda::Soda soda;
-	soda.main();
-	return 0;
+	return soda.main();
 }
