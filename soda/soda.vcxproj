@@ -19,16 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Byte.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Soda.cpp" />
     <ClCompile Include="Token.cpp" />
+    <ClCompile Include="Translator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Byte.h" />
     <ClInclude Include="TokenTypes.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Soda.h" />
     <ClInclude Include="Token.h" />
+    <ClInclude Include="Translator.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -7,6 +7,7 @@ namespace sda
 	{
 		EMPTY = 0,
 		FUNCTION,
+		VAR,
 		ASSIGNMENT,
 		SEMICOLON,
 		LBRACKET,

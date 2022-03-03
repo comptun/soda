@@ -176,7 +176,12 @@ namespace sda
 			}
 			i += 1;
 		}
-		std::cout << this->tokens;
+		//std::cout << this->tokens;
+	}
+
+	TokenList& Lexer::getTokens()
+	{
+		return this->tokens;
 	}
 
 	Lexer::Lexer()
@@ -184,6 +189,7 @@ namespace sda
 		using T = Token;
 		this->possibleTokens = TokenList{
 			T("function", TT::FUNCTION),
+			T("var", TT::VAR),
 			T("=", TT::ASSIGNMENT),
 			T(";", TT::SEMICOLON),
 			T("(", TT::LBRACKET),

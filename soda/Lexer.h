@@ -30,6 +30,7 @@ namespace sda
 	public:
 		void push_token(Token token);
 		void push_token(std::string name, TT type);
+		TokenList& getTokens();
 		Token& at(size_t index);
 		void lex(std::string const& filePath);
 		Lexer();
