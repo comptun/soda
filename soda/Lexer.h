@@ -23,6 +23,7 @@ namespace sda
 		TT getTokenType(std::string const& name);
 		size_t largestToken();
 		bool isWhitespace(char c);
+		bool isNumber(std::string const& str);
 		Token getSpecialToken(std::string const& str, size_t index);
 		Token getName(std::string const& str, size_t index);
 		void tokenize(std::string const& name);

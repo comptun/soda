@@ -91,6 +91,19 @@ namespace sda
 		return c == ' ' || c == '	';
 	}
 
+	bool Lexer::isNumber(std::string const& str)
+	{
+		bool periodFound = false;
+		for (auto& i : str) {
+			if (i == '.' && !periodFound) {
+				periodFound = true;
+			}
+			else if ((i == '.' && periodFound) || !std::isdigit(i)) {
+				return false;
+			}
+		}
+	}
+
 	Token Lexer::getSpecialToken(std::string const& str, size_t index)
 	{
 		for (size_t i = this->largestToken(); i > 0; --i) {
@@ -105,7 +118,28 @@ namespace sda
 	Token Lexer::getName(std::string const& str, size_t index)
 	{
 		std::string name;
-		for (size_t i = index; i < str.size() && !this->isWhitespace(str.at(index)) && getSpecialToken(str, i) == Token(); ++i) {
+		if (str.at(index) == '"') {
+			std::string substr;
+			for (size_t i = index + 1; str.at(i) != '"'; ++i) {
+				substr.push_back(str.at(i));
+			}
+			return Token(substr, TT::STRING);
+		}
+		/*if (isNumber(std::to_string(str.at(index)))) {
+			std::cout << 1;
+			std::string substr;
+			bool periodFound = false;
+			for (size_t i = index + 1; std::isdigit(str.at(i)) || (str.at(i) == '.' && !periodFound); ++i) {
+				if (str.at(i) == '.')
+					periodFound = true;
+				substr.push_back(str.at(i));
+				std::cout << 1;
+			}
+			if (periodFound)
+				return Token(substr, TT::FLOATINGPOINT);
+			return Token(substr, TT::INT);
+		}*/
+		for (size_t i = index; i < str.size() && !this->isWhitespace(str.at(i)) && getSpecialToken(str, i) == Token(); ++i) {
 			name.push_back(str.at(i));
 		}
 		return Token(name, TT::NAME);
@@ -133,6 +167,10 @@ namespace sda
 			else if (!this->isWhitespace(this->fileContents.at(i))) {
 				Token potentialName = this->getName(this->fileContents, i);
 				this->push_token(potentialName);
+				if (potentialName.getType() == TT::STRING) {
+					i += potentialName.getName().size() + 2;
+					continue;
+				}
 				i += potentialName.getName().size();
 				continue;
 			}
@@ -152,6 +190,8 @@ namespace sda
 			T(")", TT::RBRACKET),
 			T("{", TT::LCURLYBRACE),
 			T("}", TT::RCURLYBRACE),
+			T("[", TT::LSQUAREBRACE),
+			T("]", TT::RSQUAREBRACE),
 			T("+", TT::ADD),
 			T("-", TT::SUBTRACT),
 			T("*", TT::MULTIPLY),
@@ -163,6 +203,21 @@ namespace sda
 			T("-=", TT::SUBTRACTEQUALS),
 			T("*=", TT::MULTIPLYEQUALS),
 			T("%=", TT::MODULUSEQUALS),
+			T("::", TT::DOUBLECOLON),
+			T("==", TT::EQUALTO),
+			T("<", TT::LESSTHAN),
+			T(">", TT::GREATERTHAN),
+			T("<=", TT::LESSTHANEQUALTO),
+			T(">=", TT::GREATERTHANEQUALTO),
+			T("!=", TT::NOTEQUALTO),
+			T("&&", TT::AND),
+			T("||", TT::OR),
+			T("!", TT::NOT),
+			T("&", TT::BITWISEAND),
+			T("|", TT::BITWISEOR),
+			T("^", TT::BITWISEXOR),
+			T("<<", TT::LEFTSHIFT),
+			T(">>", TT::RIGHTSHIFT),
 		};
 	}
 }
