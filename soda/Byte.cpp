@@ -46,11 +46,15 @@ namespace sda
 		}
 		return out;
 	}
-	Byte& Bytecode::get(size_t index)
+	size_t Bytecode::size()
+	{
+		return this->bytecode.size();
+	}
+	Byte& Bytecode::at(size_t index)
 	{
 		return this->bytecode.at(index);
 	}
-	Byte& Bytecode::get()
+	Byte& Bytecode::back()
 	{
 		return this->bytecode.back();
 	}

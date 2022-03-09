@@ -25,7 +25,7 @@ namespace sda
 		std::string line;
 		while (std::getline(file, line)) {
 			if (this->getAhead(line, 0, 6) == "import") {
-				std::string linkedFile = this->getAhead(line, 8, line.size());
+				std::string linkedFile = this->getAhead(line, 8, line.size() - 1);
 				this->readFile(linkedFile);
 				continue;
 			}
@@ -125,20 +125,13 @@ namespace sda
 			}
 			return Token(substr, TT::STRING);
 		}
-		/*if (isNumber(std::to_string(str.at(index)))) {
-			std::cout << 1;
+		if (std::isdigit(str.at(index))) {
 			std::string substr;
-			bool periodFound = false;
-			for (size_t i = index + 1; std::isdigit(str.at(i)) || (str.at(i) == '.' && !periodFound); ++i) {
-				if (str.at(i) == '.')
-					periodFound = true;
+			for (size_t i = index; str.at(i) == '.' || std::isdigit(str.at(i)); ++i) {
 				substr.push_back(str.at(i));
-				std::cout << 1;
 			}
-			if (periodFound)
-				return Token(substr, TT::FLOATINGPOINT);
-			return Token(substr, TT::INT);
-		}*/
+			return Token(substr, TT::NUM);
+		}
 		for (size_t i = index; i < str.size() && !this->isWhitespace(str.at(i)) && getSpecialToken(str, i) == Token(); ++i) {
 			name.push_back(str.at(i));
 		}

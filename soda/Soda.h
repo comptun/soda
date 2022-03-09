@@ -3,10 +3,13 @@
 
 #include "Lexer.h"
 #include "Translator.h"
+#include "BytecodeInterpreter.h"
 
 namespace sda
 {
-	class Soda : public Lexer, public Translator
+	class Soda : public Lexer, 
+				 public Translator, 
+				 public BytecodeInterpreter
 	{
 	public:
 		int main();

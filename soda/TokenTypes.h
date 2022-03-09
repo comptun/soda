@@ -46,8 +46,7 @@ namespace sda
 
 		STRING,
 		NAME,
-		INT,
-		FLOATINGPOINT,
+		NUM,
 	};
 }
 

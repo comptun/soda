@@ -70,22 +70,70 @@ namespace sda
 
 	void Translator::translate(TokenList& tokens)
 	{
-		for (size_t i = 0; i < tokens.size(); ++i) {
+		istack << Instruction("start", "EMPTY");
+		for (size_t i = 0; i < tokens.size();) {
 			if (tokens.at(i).getType() == TT::SEMICOLON) {
 				if (istack.back().getInstruction() == "assignment") {
 					bytecode << Byte("pop", "0");
 					bytecode << Byte("assign", "0");
 					bytecode << Byte("pop", "0");
 					bytecode << Byte("pop", "0");
+					istack.pop();
 				}
-				istack.pop();
+				
+				i += 1;
 			}
 			else if (tokens.at(i).getType() == TT::VAR) {
-				istack << Instruction("assignment", tokens.at(i + 1).getName());
 				bytecode << Byte("var", tokens.at(i + 1).getName());
-				bytecode << Byte("loadref", tokens.at(i + 1).getName());
-				bytecode << Byte("load", "0");
-				bytecode << Byte("loadbackref", "0");
+				i += 1;
+			}
+			else if (tokens.at(i).getType() == TT::NAME) {
+				if (tokens.at(i + 1).getType() == TT::ASSIGNMENT) {
+					bytecode << Byte("pushref", tokens.at(i).getName());
+				}
+				else if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("pushname", tokens.at(i).getName());
+					bytecode << Byte(istack.back().getData(), "0");
+					bytecode << Byte("pop", "0");
+					istack.pop();
+				}
+				else {
+					bytecode << Byte("pushname", tokens.at(i).getName());
+					bytecode << Byte("pushbackref", "0");
+				}
+				i += 1;
+			}
+			else if (tokens.at(i).getType() == TT::ASSIGNMENT) {
+				istack << Instruction("assignment", "EMPTY");
+				i += 1;
+			}
+			else if (tokens.at(i).getType() == TT::NUM) {
+				if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("push", tokens.at(i).getName());
+					bytecode << Byte(istack.back().getData(), "0");
+					bytecode << Byte("pop", "0");
+					istack.pop();
+				}
+				else {
+					bytecode << Byte("push", tokens.at(i).getName());
+					bytecode << Byte("pushbackref", "0");
+				}
+				i += 1;
+			}
+			else if (tokens.at(i).getType() == TT::ADD ||
+				tokens.at(i).getType() == TT::SUBTRACT ||
+				tokens.at(i).getType() == TT::MULTIPLY ||
+				tokens.at(i).getType() == TT::DIVIDE) {
+				TT op = tokens.at(i).getType();
+				if (op == TT::ADD)
+					istack << Instruction("operator", "add");
+				else if (op == TT::SUBTRACT)
+					istack << Instruction("operator", "sub");
+				else if (op == TT::MULTIPLY)
+					istack << Instruction("operator", "mul");
+				else if (op == TT::DIVIDE)
+					istack << Instruction("operator", "div");
+				i += 1;
 			}
 		}
 	}

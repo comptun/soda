@@ -28,8 +28,9 @@ namespace sda
 		void push_byte(Byte instruction);
 		friend Bytecode& operator<<(Bytecode& out, Byte byte);
 		friend std::ostream& operator<<(std::ostream& out, Bytecode bytes);
-		Byte& get(size_t index);
-		Byte& get();
+		size_t size();
+		Byte& at(size_t index);
+		Byte& back();
 	};
 }
 

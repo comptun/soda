@@ -1,5 +1,4 @@
 #include "Soda.h"
-#include "Translator.h"
 
 namespace sda
 {
@@ -7,7 +6,8 @@ namespace sda
 	{
 		lex("main.soda");
 		translate(getTokens());
-		std::cout << getBytecode();
+		interpret(getBytecode());
+		std::cin.get();
 		return 1;
 	}
 }
