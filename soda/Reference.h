@@ -6,9 +6,13 @@ namespace sda
 	class Reference
 	{
 	private:
-		size_t address;
+		size_t m_Address;
+		size_t m_StackFrame;
 	public:
-		size_t& get();
+		size_t& address();
+		size_t& stackFrame();
+		Reference(size_t m_Address, size_t m_StackFrame);
+		Reference();
 	};
 }
 

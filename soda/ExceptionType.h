@@ -6,6 +6,7 @@ namespace sda
 	enum class ET
 	{
 		UNKNOWN_TYPE = 0,
+		EMPTY_STACK,
 	};
 }
 
