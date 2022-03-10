@@ -156,6 +156,56 @@ namespace sda
 			std::get<INT>(LHS) %= std::get<INT>(RHS);
 	}
 
+	void BytecodeInterpreter::bitwiseand()
+	{
+		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
+		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
+			std::get<INT>(LHS) &= std::get<INT>(RHS);
+	}
+
+	void BytecodeInterpreter::bitwiseor()
+	{
+		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
+		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
+			std::get<INT>(LHS) |= std::get<INT>(RHS);
+	}
+
+	void BytecodeInterpreter::bitwisexor()
+	{
+		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
+		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
+			std::get<INT>(LHS) ^= std::get<INT>(RHS);
+	}
+
+	void BytecodeInterpreter::lshift()
+	{
+		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
+		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
+			std::get<INT>(LHS) <<= std::get<INT>(RHS);
+	}
+
+	void BytecodeInterpreter::rshift()
+	{
+		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
+		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
+			std::get<INT>(LHS) >>= std::get<INT>(RHS);
+	}
+
 	BytecodeInterpreter::STACK BytecodeInterpreter::getStack()
 	{
 		return this->stack;
@@ -196,6 +246,30 @@ namespace sda
 			}
 			else if (opcode == "add") {
 				this->add();
+			}
+			else if (opcode == "sub") {
+				this->sub();
+			}
+			else if (opcode == "mul") {
+				this->mul();
+			}
+			else if (opcode == "div") {
+				this->div();
+			}
+			else if (opcode == "and") {
+				this->bitwiseand();
+			}
+			else if (opcode == "or") {
+				this->bitwiseor();
+			}
+			else if (opcode == "xor") {
+				this->bitwisexor();
+			}
+			else if (opcode == "lshift") {
+				this->lshift();
+			}
+			else if (opcode == "rshift") {
+				this->rshift();
 			}
 		}
 	}

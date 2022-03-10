@@ -36,6 +36,7 @@
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="ExceptionType.h" />
     <ClInclude Include="Name.h" />
+    <ClInclude Include="Opcodes.h" />
     <ClInclude Include="Reference.h" />
     <ClInclude Include="TokenTypes.h" />
     <ClInclude Include="Lexer.h" />

@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "Opcodes.h"
+
 namespace sda
 {
 	class Byte

@@ -20,13 +20,14 @@ namespace sda
 		typedef long double FLOAT;
 		typedef std::string STRING;
 
-		typedef std::variant<INT, FLOAT, STRING> LIST_TYPE;
+		typedef std::variant<INT, FLOAT, STRING, Reference> LIST_TYPE;
 		typedef std::vector<LIST_TYPE> LIST;
 		typedef std::variant<INT, FLOAT, STRING, Reference, LIST> TYPE;
 		typedef std::vector<std::vector<TYPE>> STACK;
 		typedef std::vector<std::vector<Name>> NAMES;
 
 		STACK stack;
+		STACK params;
 		NAMES names;
 		
 		std::string getType(std::string const& str);
@@ -50,6 +51,11 @@ namespace sda
 		void mul();
 		void div();
 		void mod();
+		void bitwiseand();
+		void bitwiseor();
+		void bitwisexor();
+		void lshift();
+		void rshift();
 
 	public:
 

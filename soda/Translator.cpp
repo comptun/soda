@@ -72,7 +72,11 @@ namespace sda
 	{
 		istack << Instruction("start", "EMPTY");
 		for (size_t i = 0; i < tokens.size();) {
-			if (tokens.at(i).getType() == TT::SEMICOLON) {
+
+			TT type = tokens.at(i).getType();
+			std::string name = tokens.at(i).getName();
+
+			if (type == TT::SEMICOLON) {
 				if (istack.back().getInstruction() == "assignment") {
 					bytecode << Byte("pop", "0");
 					bytecode << Byte("assign", "0");
@@ -83,56 +87,70 @@ namespace sda
 				
 				i += 1;
 			}
-			else if (tokens.at(i).getType() == TT::VAR) {
+			else if (type == TT::VAR) {
 				bytecode << Byte("var", tokens.at(i + 1).getName());
 				i += 1;
 			}
-			else if (tokens.at(i).getType() == TT::NAME) {
+			else if (type == TT::NAME) {
 				if (tokens.at(i + 1).getType() == TT::ASSIGNMENT) {
-					bytecode << Byte("pushref", tokens.at(i).getName());
+					bytecode << Byte("pushref", name);
 				}
 				else if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("pushname", tokens.at(i).getName());
+					bytecode << Byte("pushname", name);
 					bytecode << Byte(istack.back().getData(), "0");
 					bytecode << Byte("pop", "0");
 					istack.pop();
 				}
 				else {
-					bytecode << Byte("pushname", tokens.at(i).getName());
+					bytecode << Byte("pushname", name);
 					bytecode << Byte("pushbackref", "0");
 				}
 				i += 1;
 			}
-			else if (tokens.at(i).getType() == TT::ASSIGNMENT) {
+			else if (type == TT::ASSIGNMENT) {
 				istack << Instruction("assignment", "EMPTY");
 				i += 1;
 			}
-			else if (tokens.at(i).getType() == TT::NUM) {
+			else if (type == TT::NUM) {
 				if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("push", tokens.at(i).getName());
+					bytecode << Byte("push", name);
 					bytecode << Byte(istack.back().getData(), "0");
 					bytecode << Byte("pop", "0");
 					istack.pop();
 				}
 				else {
-					bytecode << Byte("push", tokens.at(i).getName());
+					bytecode << Byte("push", name);
 					bytecode << Byte("pushbackref", "0");
 				}
 				i += 1;
 			}
-			else if (tokens.at(i).getType() == TT::ADD ||
-				tokens.at(i).getType() == TT::SUBTRACT ||
-				tokens.at(i).getType() == TT::MULTIPLY ||
-				tokens.at(i).getType() == TT::DIVIDE) {
-				TT op = tokens.at(i).getType();
-				if (op == TT::ADD)
+			else if (type == TT::ADD ||
+				type == TT::SUBTRACT ||
+				type == TT::MULTIPLY ||
+				type == TT::DIVIDE ||
+				type == TT::BITWISEAND ||
+				type == TT::BITWISEOR ||
+				type == TT::BITWISEXOR ||
+				type == TT::LEFTSHIFT ||
+				type == TT::RIGHTSHIFT) {
+				if (type == TT::ADD)
 					istack << Instruction("operator", "add");
-				else if (op == TT::SUBTRACT)
+				else if (type == TT::SUBTRACT)
 					istack << Instruction("operator", "sub");
-				else if (op == TT::MULTIPLY)
+				else if (type == TT::MULTIPLY)
 					istack << Instruction("operator", "mul");
-				else if (op == TT::DIVIDE)
+				else if (type == TT::DIVIDE)
 					istack << Instruction("operator", "div");
+				else if (type == TT::BITWISEAND)
+					istack << Instruction("operator", "and");
+				else if (type == TT::BITWISEOR)
+					istack << Instruction("operator", "or");
+				else if (type == TT::BITWISEXOR)
+					istack << Instruction("operator", "xor");
+				else if (type == TT::LEFTSHIFT)
+					istack << Instruction("operator", "lshift");
+				else if (type == TT::RIGHTSHIFT)
+					istack << Instruction("operator", "rshift");
 				i += 1;
 			}
 		}
