@@ -7,9 +7,7 @@
 
 namespace sda
 {
-	class Soda : public Lexer, 
-				 public Translator, 
-				 public BytecodeInterpreter
+	class Soda : public Lexer, public Translator, public BytecodeInterpreter
 	{
 	public:
 		int main();

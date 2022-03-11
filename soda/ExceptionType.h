@@ -7,6 +7,7 @@ namespace sda
 	{
 		UNKNOWN_TYPE = 0,
 		EMPTY_STACK,
+		DIVISION_BY_ZERO,
 	};
 }
 

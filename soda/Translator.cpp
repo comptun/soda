@@ -89,10 +89,28 @@ namespace sda
 			}
 			else if (type == TT::VAR) {
 				bytecode << Byte("var", tokens.at(i + 1).getName());
-				i += 1;
+				if (tokens.at(i + 2).getType() == TT::SEMICOLON) {
+					i += 3;
+				}
+				else {
+					i += 1;
+				}
 			}
 			else if (type == TT::NAME) {
-				if (tokens.at(i + 1).getType() == TT::ASSIGNMENT) {
+				if (tokens.at(i + 1).getType() == TT::LBRACKET) {
+					bytecode << Byte("newparamstack", "0");
+					istack << Instruction("functioncall", tokens.at(i).getName());
+					if (tokens.at(i + 2).getType() == TT::RBRACKET) {
+						bytecode << Byte("call", name);
+						bytecode << Byte("popparamstack", "0");
+						istack.pop();
+						i += 3;
+						continue;
+					}
+					i += 2;
+					continue;
+				}
+				else if (tokens.at(i + 1).getType() == TT::ASSIGNMENT) {
 					bytecode << Byte("pushref", name);
 				}
 				else if (istack.back().getInstruction() == "operator") {
@@ -111,7 +129,7 @@ namespace sda
 				istack << Instruction("assignment", "EMPTY");
 				i += 1;
 			}
-			else if (type == TT::NUM) {
+			else if (type == TT::NUM || type == TT::STRING) {
 				if (istack.back().getInstruction() == "operator") {
 					bytecode << Byte("push", name);
 					bytecode << Byte(istack.back().getData(), "0");
@@ -151,6 +169,23 @@ namespace sda
 					istack << Instruction("operator", "lshift");
 				else if (type == TT::RIGHTSHIFT)
 					istack << Instruction("operator", "rshift");
+				i += 1;
+			}
+			else if (type == TT::COMMA) {
+				bytecode << Byte("pop", "0");
+				bytecode << Byte("pushparam", "0");
+				bytecode << Byte("pop", "0");
+				i += 1;
+			}
+			else if (type == TT::RBRACKET) {
+				if (istack.back().getInstruction() == "functioncall") {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte("pushparam", "0");
+					bytecode << Byte("pop", "0");
+					bytecode << Byte("call", istack.back().getData());
+					bytecode << Byte("popparamstack", "0");
+					istack.pop();
+				}
 				i += 1;
 			}
 		}

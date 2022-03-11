@@ -25,6 +25,7 @@
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Name.cpp" />
+    <ClCompile Include="PrecompiledFunctions.cpp" />
     <ClCompile Include="Reference.cpp" />
     <ClCompile Include="Soda.cpp" />
     <ClCompile Include="Token.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="ExceptionType.h" />
     <ClInclude Include="Name.h" />
     <ClInclude Include="Opcodes.h" />
+    <ClInclude Include="PrecompiledFunctions.h" />
     <ClInclude Include="Reference.h" />
     <ClInclude Include="TokenTypes.h" />
     <ClInclude Include="Lexer.h" />

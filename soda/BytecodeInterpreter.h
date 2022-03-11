@@ -9,10 +9,11 @@
 #include "Byte.h"
 #include "Exceptions.h"
 #include "Name.h"
+#include "PrecompiledFunctions.h"
 
 namespace sda
 {
-	class BytecodeInterpreter : public Exceptions
+	class BytecodeInterpreter : public Exceptions, public PrecompiledFunctions
 	{
 	private:
 
@@ -39,12 +40,17 @@ namespace sda
 		void newNames();
 		void popNames();
 
+		void newparamstack();
+		void popparamstack();
+
 		void push(std::string const& data); // Pushes given data onto the stack
 		void pop(); // "Pops" and frees data from the stack
+		void pushparam(); // Pushes parameter from regular stack onto paramater stack for usage in functions
 		void var(std::string const& name);
 		void pushref(std::string const& ref);
 		void pushbackref();
 		void assign();
+		void pushname(std::string const& name);
 
 		void add();
 		void sub();

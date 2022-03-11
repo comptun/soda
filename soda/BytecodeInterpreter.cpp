@@ -38,6 +38,9 @@ namespace sda
 	void BytecodeInterpreter::newNames() { this->names.push_back(std::vector<Name>()); }
 	void BytecodeInterpreter::popNames() { this->names.pop_back(); }
 
+	void BytecodeInterpreter::newparamstack() { this->params.push_back(std::vector<TYPE>()); }
+	void BytecodeInterpreter::popparamstack() { this->params.pop_back(); };
+
 	void BytecodeInterpreter::push(std::string const& data)
 	{
 		if (this->getType(data) == "int")
@@ -56,6 +59,11 @@ namespace sda
 			this->stack.back().pop_back();
 		else
 			this->exception(ET::EMPTY_STACK);
+	}
+
+	void BytecodeInterpreter::pushparam()
+	{
+		this->params.back().push_back(stack.back().back());
 	}
 
 	void BytecodeInterpreter::var(std::string const& name)
@@ -80,6 +88,11 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 		LHS = RHS;
+	}
+
+	void BytecodeInterpreter::pushname(std::string const& name)
+	{
+		this->stack.back().push_back(this->stack.at(this->getName(name).reference().stackFrame()).at(this->getName(name).reference().address()));
 	}
 
 	void BytecodeInterpreter::add()
@@ -136,6 +149,18 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 
+		if (std::holds_alternative<INT>(RHS))
+			if (std::get<INT>(RHS) == 0) {
+				this->exception(ET::DIVISION_BY_ZERO);
+				return;
+			}
+
+		else if (std::holds_alternative<FLOAT>(RHS))
+			if (std::get<FLOAT>(RHS) == 0.0) {
+				this->exception(ET::DIVISION_BY_ZERO);
+				return;
+			}
+
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) /= std::get<INT>(RHS);
 		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
@@ -151,6 +176,12 @@ namespace sda
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<INT>(RHS))
+			if (std::get<INT>(RHS) == 0) {
+				this->exception(ET::DIVISION_BY_ZERO);
+				return;
+			}
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) %= std::get<INT>(RHS);
@@ -232,6 +263,9 @@ namespace sda
 			else if (opcode == "push") {
 				this->push(data);
 			}
+			else if (opcode == "pushparam") {
+				this->pushparam();
+			}
 			else if (opcode == "var") {
 				this->var(data);
 			}
@@ -243,6 +277,9 @@ namespace sda
 			}
 			else if (opcode == "assign") {
 				this->assign();
+			}
+			else if (opcode == "pushname") {
+				this->pushname(data);
 			}
 			else if (opcode == "add") {
 				this->add();
@@ -270,6 +307,15 @@ namespace sda
 			}
 			else if (opcode == "rshift") {
 				this->rshift();
+			}
+			else if (opcode == "newparamstack") {
+				this->newparamstack();
+			}
+			else if (opcode == "popparamstack") {
+				this->popparamstack();
+			}
+			else if (opcode == "call") {
+				this->call(data, params.back());
 			}
 		}
 	}
