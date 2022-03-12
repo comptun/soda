@@ -26,10 +26,12 @@ namespace sda
 		typedef std::variant<INT, FLOAT, STRING, Reference, LIST> TYPE;
 		typedef std::vector<std::vector<TYPE>> STACK;
 		typedef std::vector<std::vector<Name>> NAMES;
+		typedef std::vector<size_t> JUMPSTACK;
 
 		STACK stack;
 		STACK params;
 		NAMES names;
+		JUMPSTACK js;
 
 		TYPE RETURN;
 		

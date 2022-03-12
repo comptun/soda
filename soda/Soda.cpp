@@ -6,8 +6,8 @@ namespace sda
 	{
 		lex("main.soda");
 		translate(getTokens());
-		interpret(getBytecode());
 		//std::cout << getBytecode();
+		interpret(getBytecode());
 		std::cin.get();
 		return 1;
 	}

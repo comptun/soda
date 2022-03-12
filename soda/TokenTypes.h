@@ -8,6 +8,7 @@ namespace sda
 		EMPTY = 0,
 		FUNCTION,
 		VAR,
+		RETURN,
 		ASSIGNMENT,
 		SEMICOLON,
 		LBRACKET,

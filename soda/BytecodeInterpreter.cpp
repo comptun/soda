@@ -280,11 +280,16 @@ namespace sda
 			}
 			else if (opcode == "return") {
 				this->RETURN = stack.back().back();
+				i = js.back();
+				js.pop_back();
+				continue;
 			}
 			else if (opcode == "varparam") {
 				this->var(data);
 				this->stack.back().at(this->getName(data).reference().address()) = this->params.back().front();
-				this->params.back().erase(this->params.back().begin());
+				std::reverse(params.back().begin(), params.back().end());
+				params.back().pop_back();
+				std::reverse(params.back().begin(), params.back().end());
 			}
 			else if (opcode == "pushref") {
 				this->pushref(data);
@@ -335,7 +340,11 @@ namespace sda
 				if (this->call(data, params.back())) {
 					this->RETURN = this->getReturnValue();
 				}
-				
+				else {
+					js.push_back(i + 1);
+					i = std::get<INT>(this->stack.front().at(this->getName(data).reference().address())) - 1;
+					continue;
+				}
 			}
 			else if (opcode == "newstack") {
 				this->newstack();

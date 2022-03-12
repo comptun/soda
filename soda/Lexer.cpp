@@ -184,6 +184,7 @@ namespace sda
 		this->possibleTokens = TokenList{
 			T("function", TT::FUNCTION),
 			T("var", TT::VAR),
+			T("return", TT::RETURN),
 			T("=", TT::ASSIGNMENT),
 			T(";", TT::SEMICOLON),
 			T("(", TT::LBRACKET),

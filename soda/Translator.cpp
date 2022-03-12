@@ -97,7 +97,11 @@ namespace sda
 					bytecode << Byte("pop", "0");
 					istack.pop();
 				}
-				
+				else if (istack.back().getInstruction() == "return") {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte("return", "0");
+					istack.pop();
+				}
 				i += 1;
 			}
 			else if (type == TT::VAR) {
@@ -127,9 +131,9 @@ namespace sda
 				}
 				else if (tokens.at(i + 1).getType() == TT::LBRACKET) {
 					bytecode << Byte("newparamstack", "0");
-					bytecode << Byte("newstack", "0");
 					istack << Instruction("functioncall", tokens.at(i).getName());
 					if (tokens.at(i + 2).getType() == TT::RBRACKET) {
+						bytecode << Byte("newstack", "0");
 						bytecode << Byte("call", name);
 						bytecode << Byte("popparamstack", "0");
 						bytecode << Byte("popstack", "0");
@@ -222,6 +226,7 @@ namespace sda
 					bytecode << Byte("pop", "0");
 					bytecode << Byte("pushparam", "0");
 					bytecode << Byte("pop", "0");
+					bytecode << Byte("newstack", "0");
 					bytecode << Byte("call", istack.back().getData());
 					bytecode << Byte("popparamstack", "0");
 					bytecode << Byte("popstack", "0");
@@ -247,6 +252,10 @@ namespace sda
 				bytecode << Byte("return", "0");
 				bytecode << Byte("endfunction", istack.back().getData());
 				istack.pop();
+				i += 1;
+			}
+			else if (type == TT::RETURN) {
+				istack << Instruction("return", "0");
 				i += 1;
 			}
 		}
