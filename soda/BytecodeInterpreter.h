@@ -30,15 +30,17 @@ namespace sda
 		STACK stack;
 		STACK params;
 		NAMES names;
+
+		TYPE RETURN;
 		
 		std::string getType(std::string const& str);
 
 		Name& getName(std::string const& name);
 
-		void newStack();
-		void popStack();
-		void newNames();
-		void popNames();
+		void newstack();
+		void popstack();
+		void newnames();
+		void popnames();
 
 		void newparamstack();
 		void popparamstack();

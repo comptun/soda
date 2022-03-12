@@ -120,8 +120,9 @@ namespace sda
 		std::string name;
 		if (str.at(index) == '"') {
 			std::string substr;
-			for (size_t i = index + 1; str.at(i) != '"'; ++i) {
+			for (size_t i = index + 1; str.at(i) != '"';) {
 				substr.push_back(str.at(i));
+				i += 1;
 			}
 			return Token(substr, TT::STRING);
 		}

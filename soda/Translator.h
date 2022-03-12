@@ -40,6 +40,7 @@ namespace sda
 	private:
 		Bytecode bytecode;
 		InstructionStack istack;
+		bool isOperator(TT type);
 	public:
 		void translate(TokenList& tokens);
 		Bytecode& getBytecode();

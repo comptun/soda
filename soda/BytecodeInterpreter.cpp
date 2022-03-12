@@ -33,10 +33,10 @@ namespace sda
 		}
 	}
 
-	void BytecodeInterpreter::newStack() { this->stack.push_back(std::vector<TYPE>()); }
-	void BytecodeInterpreter::popStack() { this->stack.pop_back(); }
-	void BytecodeInterpreter::newNames() { this->names.push_back(std::vector<Name>()); }
-	void BytecodeInterpreter::popNames() { this->names.pop_back(); }
+	void BytecodeInterpreter::newstack() { this->stack.push_back(std::vector<TYPE>()); }
+	void BytecodeInterpreter::popstack() { this->stack.pop_back(); }
+	void BytecodeInterpreter::newnames() { this->names.push_back(std::vector<Name>()); }
+	void BytecodeInterpreter::popnames() { this->names.pop_back(); }
 
 	void BytecodeInterpreter::newparamstack() { this->params.push_back(std::vector<TYPE>()); }
 	void BytecodeInterpreter::popparamstack() { this->params.pop_back(); };
@@ -269,6 +269,23 @@ namespace sda
 			else if (opcode == "var") {
 				this->var(data);
 			}
+			else if (opcode == "function") {
+				this->var(data);
+				this->pushref(data);
+				this->stack.back().push_back(static_cast<INT>(i) + 1);
+				this->assign();
+				this->pop();
+				this->pop();
+				for (; i < bytecode.size() && bytecode.at(i).getOpcode() != "endfunction"; ++i);
+			}
+			else if (opcode == "return") {
+				this->RETURN = stack.back().back();
+			}
+			else if (opcode == "varparam") {
+				this->var(data);
+				this->stack.back().at(this->getName(data).reference().address()) = this->params.back().front();
+				this->params.back().erase(this->params.back().begin());
+			}
 			else if (opcode == "pushref") {
 				this->pushref(data);
 			}
@@ -315,7 +332,21 @@ namespace sda
 				this->popparamstack();
 			}
 			else if (opcode == "call") {
-				this->call(data, params.back());
+				if (this->call(data, params.back())) {
+					this->RETURN = this->getReturnValue();
+				}
+				
+			}
+			else if (opcode == "newstack") {
+				this->newstack();
+				this->newnames();
+			}
+			else if (opcode == "popstack") {
+				this->popstack();
+				this->popnames();
+			}
+			else if (opcode == "pushreturnvalue") {
+				this->stack.back().push_back(RETURN);
 			}
 		}
 	}
