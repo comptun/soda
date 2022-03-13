@@ -89,7 +89,21 @@ namespace sda
 			TT type = tokens.at(i).getType();
 			std::string name = tokens.at(i).getName();
 
-			if (type == TT::SEMICOLON) {
+			if (type == TT::LSQUAREBRACE) {
+				bytecode << Byte("pop", "0");
+				istack << Instruction("listindex", "0");
+				i += 1;
+			}
+			else if (type == TT::RSQUAREBRACE) {
+				if (istack.back().getInstruction() == "listindex") {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte("pushlistindex", "0");
+					bytecode << Byte("pushbackref", "0");
+					istack.pop();
+					i += 1;
+				}
+			}
+			else if (type == TT::SEMICOLON) {
 				if (istack.back().getInstruction() == "assignment") {
 					bytecode << Byte("pop", "0");
 					bytecode << Byte("assign", "0");
@@ -130,28 +144,37 @@ namespace sda
 					}
 				}
 				else if (tokens.at(i + 1).getType() == TT::LBRACKET) {
-					bytecode << Byte("newparamstack", "0");
-					istack << Instruction("functioncall", tokens.at(i).getName());
-					if (tokens.at(i + 2).getType() == TT::RBRACKET) {
-						bytecode << Byte("newstack", "0");
-						bytecode << Byte("call", name);
-						bytecode << Byte("popparamstack", "0");
-						bytecode << Byte("popstack", "0");
-						istack.pop();
-						if (istack.back().getInstruction() == "operator") {
-							bytecode << Byte("pushreturnvalue", "0");
-							bytecode << Byte(istack.back().getData(), "0");
-							bytecode << Byte("pop", "0");
-						}
-						else {
-							bytecode << Byte("pushreturnvalue", "0");
-							bytecode << Byte("pushbackref", "0");
-						}
-						i += 3;
+					if (name == "ref" && tokens.at(i + 2).getType() == TT::NAME && tokens.at(i + 3).getType() == TT::RBRACKET) {
+						bytecode << Byte("pushref", tokens.at(i + 2).getName());
+						bytecode << Byte("pushbackref", "0");
+						i += 4;
 						continue;
 					}
-					i += 2;
-					continue;
+					else {
+						bytecode << Byte("newparamstack", "0");
+						istack << Instruction("functioncall", tokens.at(i).getName());
+						if (tokens.at(i + 2).getType() == TT::RBRACKET) {
+							bytecode << Byte("newstack", "0");
+							bytecode << Byte("call", name);
+							bytecode << Byte("popparamstack", "0");
+							bytecode << Byte("popstack", "0");
+							istack.pop();
+							if (istack.back().getInstruction() == "operator") {
+								bytecode << Byte("pushreturnvalue", "0");
+								bytecode << Byte(istack.back().getData(), "0");
+								bytecode << Byte("pop", "0");
+								istack.pop();
+							}
+							else {
+								bytecode << Byte("pushreturnvalue", "0");
+								bytecode << Byte("pushbackref", "0");
+							}
+							i += 3;
+							continue;
+						}
+						i += 2;
+						continue;
+					}
 				}
 				else if (tokens.at(i + 1).getType() == TT::ASSIGNMENT) {
 					bytecode << Byte("pushref", name);

@@ -33,6 +33,18 @@ namespace sda
 		}
 	}
 
+	BytecodeInterpreter::TYPE& BytecodeInterpreter::getNameValue(std::string const& name)
+	{
+		Name& n = getName(name);
+		return this->stack.at(n.reference().stackFrame()).at(n.reference().address());
+	}
+
+	void BytecodeInterpreter::deref(TYPE& ref)
+	{
+		Reference r = std::get<Reference>(ref);
+		ref = this->stack.at(r.stackFrame()).at(r.address());
+	}
+
 	void BytecodeInterpreter::newstack() { this->stack.push_back(std::vector<TYPE>()); }
 	void BytecodeInterpreter::popstack() { this->stack.pop_back(); }
 	void BytecodeInterpreter::newnames() { this->names.push_back(std::vector<Name>()); }
@@ -74,6 +86,11 @@ namespace sda
 
 	void BytecodeInterpreter::pushref(std::string const& ref)
 	{
+		Name n = this->getName(ref);
+		TYPE val = this->getNameValue(ref);
+		if (std::holds_alternative<Reference>(val)) {
+			this->stack.back().push_back(val);
+		}
 		this->stack.back().push_back(this->getName(ref).reference());
 	}
 
@@ -87,12 +104,19 @@ namespace sda
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
+		if (std::holds_alternative<Reference>(RHS)) {
+			TYPE& RHS = this->stack.back().back();
+		}
 		LHS = RHS;
 	}
 
 	void BytecodeInterpreter::pushname(std::string const& name)
 	{
-		this->stack.back().push_back(this->stack.at(this->getName(name).reference().stackFrame()).at(this->getName(name).reference().address()));
+		TYPE& val = this->getNameValue(name);
+		if (std::holds_alternative<Reference>(val)) {
+			this->deref(val);
+		}
+		this->stack.back().push_back(val);
 	}
 
 	void BytecodeInterpreter::add()
@@ -237,6 +261,28 @@ namespace sda
 			std::get<INT>(LHS) >>= std::get<INT>(RHS);
 	}
 
+	void BytecodeInterpreter::pushlistindex()
+	{
+		size_t index = std::get<INT>(this->stack.back().at(this->stack.back().size() - 1));
+		LIST list = std::get<LIST>(this->stack.back().at(this->stack.back().size() - 2));
+		LIST_TYPE t = list.at(index);
+		TYPE item;
+		if (std::holds_alternative<INT>(t)) {
+			item = std::get<INT>(t);
+		}
+		else if (std::holds_alternative<FLOAT>(t)) {
+			item = std::get<FLOAT>(t);
+		}
+		else if (std::holds_alternative<STRING>(t)) {
+			item = std::get<STRING>(t);
+		}
+		else if (std::holds_alternative<Reference>(t)) {
+			Reference r = std::get<Reference>(t);
+			item = std::get<LIST>(this->stack.at(r.stackFrame()).at(r.address()));
+		}
+		this->stack.back().push_back(item);
+	}
+
 	BytecodeInterpreter::STACK BytecodeInterpreter::getStack()
 	{
 		return this->stack;
@@ -337,7 +383,7 @@ namespace sda
 				this->popparamstack();
 			}
 			else if (opcode == "call") {
-				if (this->call(data, params.back())) {
+				if (this->call(data, params.back(), stack)) {
 					this->RETURN = this->getReturnValue();
 				}
 				else {
@@ -356,6 +402,9 @@ namespace sda
 			}
 			else if (opcode == "pushreturnvalue") {
 				this->stack.back().push_back(RETURN);
+			}
+			else if (opcode == "pushlistindex") {
+				this->pushlistindex();
 			}
 		}
 	}

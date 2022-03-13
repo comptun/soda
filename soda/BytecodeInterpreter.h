@@ -38,6 +38,8 @@ namespace sda
 		std::string getType(std::string const& str);
 
 		Name& getName(std::string const& name);
+		TYPE& getNameValue(std::string const& name);
+		void deref(TYPE& ref);
 
 		void newstack();
 		void popstack();
@@ -55,6 +57,7 @@ namespace sda
 		void pushbackref();
 		void assign();
 		void pushname(std::string const& name);
+		void pushlistindex();
 
 		void add();
 		void sub();

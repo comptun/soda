@@ -21,19 +21,22 @@ namespace sda
 		typedef std::vector<LIST_TYPE> LIST;
 		typedef std::variant<INT, FLOAT, STRING, Reference, LIST> TYPE;
 		typedef std::vector<TYPE> PARAMS;
+		typedef std::vector<std::vector<TYPE>> STACK;
 
 		TYPE RETURN;
 
 		void putchar(INT out);
 		void putstr(STRING out);
 		void pause();
-		void print(PARAMS& stack);
+		void print(PARAMS& params);
 		void endl();
-		void input(PARAMS& stack);
+		void input(PARAMS& params);
+		void list(PARAMS& params, STACK& stack);
+		void rand(INT lowerBound, INT upperBound);
 
 	public:
 		TYPE getReturnValue();
-		bool call(std::string const& name, PARAMS& stack);
+		bool call(std::string const& name, PARAMS& params, STACK& stack);
 	};
 }
 
