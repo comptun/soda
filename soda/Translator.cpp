@@ -89,7 +89,32 @@ namespace sda
 			TT type = tokens.at(i).getType();
 			std::string name = tokens.at(i).getName();
 
-			if (type == TT::LSQUAREBRACE) {
+			if (name == "class") {
+				bytecode << Byte("class", tokens.at(i + 1).getName());
+				if (tokens.at(i + 2).getType() == TT::LCURLYBRACE) {
+					istack << Instruction("classdef", tokens.at(i + 1).getName());
+				}
+				i += 3;
+			}
+			else if (name == "member") {
+				bytecode << Byte("member", tokens.at(i + 1).getName());
+				i += 3;
+			}
+			else if (name == "new") {
+				bytecode << Byte("newparamstack", "0");
+				bytecode << Byte("pushnewobject", tokens.at(i + 1).getName());
+				bytecode << Byte("pushparam", "0");
+				bytecode << Byte("pop", "0");
+				istack << Instruction("functioncall", tokens.at(i + 1).getName());
+				i += 3;
+			}
+			else if (type == TT::DOT) {
+				bytecode << Byte("pop", "0");
+				bytecode << Byte("pushmember", tokens.at(i + 1).getName());
+				bytecode << Byte("pushbackref", "0");
+				i += 2;
+			}
+			else if (type == TT::LSQUAREBRACE) {
 				bytecode << Byte("pop", "0");
 				istack << Instruction("listindex", "0");
 				i += 1;
@@ -119,6 +144,11 @@ namespace sda
 				i += 1;
 			}
 			else if (type == TT::VAR) {
+				if (istack.back().getInstruction() == "classdef") {
+					bytecode << Byte("member", tokens.at(i + 1).getName());
+					i += 3;
+					continue;
+				}
 				bytecode << Byte("var", tokens.at(i + 1).getName());
 				if (tokens.at(i + 2).getType() == TT::SEMICOLON) {
 					i += 3;
@@ -128,7 +158,17 @@ namespace sda
 				}
 			}
 			else if (type == TT::NAME) {
-				if (istack.back().getInstruction() == "functionparams") {
+				if (istack.back().getInstruction() == "classdef") {
+					if (name == istack.back().getData()) {
+						bytecode << Byte("function", name);
+						bytecode << Byte("varparam", "this");
+						istack << Instruction("constructor", name);
+						istack << Instruction("functionparams", name);
+						i += 2;
+						continue;
+					}
+				}
+				else if (istack.back().getInstruction() == "functionparams") {
 					if (tokens.at(i + 1).getType() == TT::LBRACKET) {
 						bytecode << Byte("function", name);
 						i += 2;
@@ -271,10 +311,23 @@ namespace sda
 				i += 1;
 			}
 			else if (type == TT::RCURLYBRACE) {
-				bytecode << Byte("push", "0");
-				bytecode << Byte("return", "0");
-				bytecode << Byte("endfunction", istack.back().getData());
-				istack.pop();
+				if (istack.at(istack.size() - 2).getInstruction() == "constructor") {
+					bytecode << Byte("pushname", "this");
+					bytecode << Byte("return", "0");
+					bytecode << Byte("endfunction", istack.back().getData());
+					istack.pop();
+					istack.pop();
+				}
+				else if (istack.back().getInstruction() == "functiondef") {
+					bytecode << Byte("push", "0");
+					bytecode << Byte("return", "0");
+					bytecode << Byte("endfunction", istack.back().getData());
+					istack.pop();
+				}
+				else if (istack.back().getInstruction() == "classdef") {
+					bytecode << Byte("endclass", istack.back().getData());
+					istack.pop();
+				}
 				i += 1;
 			}
 			else if (type == TT::RETURN) {

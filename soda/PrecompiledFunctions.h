@@ -2,6 +2,7 @@
 #define PRECOMPILED_FUNCTIONS_H
 
 #include "Reference.h"
+#include "Object.h"
 
 #include <string>
 #include <vector>
@@ -17,9 +18,9 @@ namespace sda
 		typedef long double FLOAT;
 		typedef std::string STRING;
 
-		typedef std::variant<INT, FLOAT, STRING, Reference> LIST_TYPE;
+		typedef std::variant<INT, FLOAT, STRING, Object, Reference> LIST_TYPE;
 		typedef std::vector<LIST_TYPE> LIST;
-		typedef std::variant<INT, FLOAT, STRING, Reference, LIST> TYPE;
+		typedef std::variant<INT, FLOAT, STRING, Object, Reference, LIST> TYPE;
 		typedef std::vector<TYPE> PARAMS;
 		typedef std::vector<std::vector<TYPE>> STACK;
 

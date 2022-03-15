@@ -10,7 +10,7 @@ namespace sda
 	{
 		return this->m_StackFrame;
 	}
-	Reference::Reference(size_t m_Address, size_t m_StackFrame)
+	Reference::Reference(size_t m_Address, int m_StackFrame)
 	{
 		this->m_Address = m_Address;
 		this->m_StackFrame = m_StackFrame;

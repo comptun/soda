@@ -21,10 +21,13 @@
   <ItemGroup>
     <ClCompile Include="Byte.cpp" />
     <ClCompile Include="BytecodeInterpreter.cpp" />
+    <ClCompile Include="Class.cpp" />
     <ClCompile Include="Exceptions.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Member.cpp" />
     <ClCompile Include="Name.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="PrecompiledFunctions.cpp" />
     <ClCompile Include="Reference.cpp" />
     <ClCompile Include="Soda.cpp" />
@@ -34,9 +37,12 @@
   <ItemGroup>
     <ClInclude Include="Byte.h" />
     <ClInclude Include="BytecodeInterpreter.h" />
+    <ClInclude Include="Class.h" />
     <ClInclude Include="Exceptions.h" />
     <ClInclude Include="ExceptionType.h" />
+    <ClInclude Include="Member.h" />
     <ClInclude Include="Name.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Opcodes.h" />
     <ClInclude Include="PrecompiledFunctions.h" />
     <ClInclude Include="Reference.h" />

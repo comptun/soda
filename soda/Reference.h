@@ -11,7 +11,7 @@ namespace sda
 	public:
 		size_t& address();
 		size_t& stackFrame();
-		Reference(size_t m_Address, size_t m_StackFrame);
+		Reference(size_t m_Address, int m_StackFrame);
 		Reference();
 	};
 }

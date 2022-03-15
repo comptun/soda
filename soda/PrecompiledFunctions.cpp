@@ -110,6 +110,10 @@ namespace sda
 			this->rand(std::get<INT>(params.at(0)), std::get<INT>(params.at(1)));
 			return true;
 		}
+		else if (name == "concat") {
+			RETURN = params.front();
+			return true;
+		}
 
 		return false;
 	}

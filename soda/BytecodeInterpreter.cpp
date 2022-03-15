@@ -33,6 +33,14 @@ namespace sda
 		}
 	}
 
+	Class BytecodeInterpreter::getClass(std::string const& name)
+	{
+		for (auto i : this->cstack) {
+			if (i.getName() == name)
+				return i;
+		}
+	}
+
 	BytecodeInterpreter::TYPE& BytecodeInterpreter::getNameValue(std::string const& name)
 	{
 		Name& n = getName(name);
@@ -75,6 +83,14 @@ namespace sda
 
 	void BytecodeInterpreter::pushparam()
 	{
+		TYPE param = this->stack.back().back();
+		if (std::holds_alternative<Reference>(param)) {
+			Reference r = std::get<Reference>(param);
+			if (r.stackFrame() == -1) {
+				this->params.back().push_back(this->heap.at(r.address()));
+				return;
+			}
+		}
 		this->params.back().push_back(stack.back().back());
 	}
 
@@ -104,6 +120,23 @@ namespace sda
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+
+				if (std::holds_alternative<Reference>(RHS)) {
+					Reference r2 = std::get<Reference>(RHS);
+					if (r2.stackFrame() == -1) {
+						RHS = this->heap.at(r2.address());
+					}
+				}
+
+				this->heap.at((r.address())) = RHS;
+				return;
+			}
+		}
+
 		if (std::holds_alternative<Reference>(RHS)) {
 			TYPE& RHS = this->stack.back().back();
 		}
@@ -113,9 +146,6 @@ namespace sda
 	void BytecodeInterpreter::pushname(std::string const& name)
 	{
 		TYPE& val = this->getNameValue(name);
-		if (std::holds_alternative<Reference>(val)) {
-			this->deref(val);
-		}
 		this->stack.back().push_back(val);
 	}
 
@@ -124,6 +154,22 @@ namespace sda
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+
+				if (std::holds_alternative<Reference>(RHS)) {
+					Reference r2 = std::get<Reference>(RHS);
+					if (r2.stackFrame() == -1) {
+						RHS = this->heap.at((r2.address()));
+					}
+				}
+
+				this->heap.at((r.address())) = RHS;
+				return;
+			}
+		}
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) += std::get<INT>(RHS);
@@ -141,6 +187,19 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
+
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) -= std::get<INT>(RHS);
 		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
@@ -157,6 +216,19 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
+
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) *= std::get<INT>(RHS);
 		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
@@ -172,6 +244,19 @@ namespace sda
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
 
 		if (std::holds_alternative<INT>(RHS))
 			if (std::get<INT>(RHS) == 0) {
@@ -201,6 +286,19 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
+
 		if (std::holds_alternative<INT>(RHS))
 			if (std::get<INT>(RHS) == 0) {
 				this->exception(ET::DIVISION_BY_ZERO);
@@ -217,6 +315,19 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
+
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) &= std::get<INT>(RHS);
 	}
@@ -226,6 +337,19 @@ namespace sda
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) |= std::get<INT>(RHS);
@@ -237,6 +361,19 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
+
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) ^= std::get<INT>(RHS);
 	}
@@ -247,6 +384,19 @@ namespace sda
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
 
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
+
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) <<= std::get<INT>(RHS);
 	}
@@ -256,6 +406,19 @@ namespace sda
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
 		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->stack.back().back();
+
+		if (std::holds_alternative<Reference>(LHS)) {
+			Reference r = std::get<Reference>(LHS);
+			if (r.stackFrame() == -1) {
+				LHS = this->heap.at((r.address()));
+			}
+		}
+		if (std::holds_alternative<Reference>(RHS)) {
+			Reference r = std::get<Reference>(RHS);
+			if (r.stackFrame() == -1) {
+				RHS = this->heap.at((r.address()));
+			}
+		}
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) >>= std::get<INT>(RHS);
@@ -281,6 +444,27 @@ namespace sda
 			item = std::get<LIST>(this->stack.at(r.stackFrame()).at(r.address()));
 		}
 		this->stack.back().push_back(item);
+	}
+
+	void BytecodeInterpreter::pushnewobject(std::string const& className)
+	{
+		Object obj = Object(this->getClass(className));
+		for (auto& i : obj.getMembers()) {
+			heap.push_back(0);
+			i.reference().address() = heap.size() - 1;
+		}
+		this->stack.back().push_back(obj);
+	}
+
+	void BytecodeInterpreter::pushmember(std::string const& name)
+	{
+		Object& obj = std::get<Object>(this->stack.back().back());
+		for (auto& i : obj.getMembers()) {
+			if (i.name() == name) {
+				this->stack.back().pop_back();
+				this->stack.back().push_back(i.reference());
+			}
+		}
 	}
 
 	BytecodeInterpreter::STACK BytecodeInterpreter::getStack()
@@ -323,6 +507,12 @@ namespace sda
 				this->pop();
 				this->pop();
 				for (; i < bytecode.size() && bytecode.at(i).getOpcode() != "endfunction"; ++i);
+			}
+			else if (opcode == "class") {
+				cstack.push_back(Class(data));
+			}
+			else if (opcode == "member") {
+				cstack.back().addMember(Name(data, Reference(0, -1)));
 			}
 			else if (opcode == "return") {
 				this->RETURN = stack.back().back();
@@ -405,6 +595,12 @@ namespace sda
 			}
 			else if (opcode == "pushlistindex") {
 				this->pushlistindex();
+			}
+			else if (opcode == "pushnewobject") {
+				this->pushnewobject(data);
+			}
+			else if (opcode == "pushmember") {
+				this->pushmember(data);
 			}
 		}
 	}

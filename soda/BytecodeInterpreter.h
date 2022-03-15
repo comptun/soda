@@ -10,6 +10,8 @@
 #include "Exceptions.h"
 #include "Name.h"
 #include "PrecompiledFunctions.h"
+#include "Class.h"
+#include "Object.h"
 
 namespace sda
 {
@@ -21,15 +23,19 @@ namespace sda
 		typedef long double FLOAT;
 		typedef std::string STRING;
 
-		typedef std::variant<INT, FLOAT, STRING, Reference> LIST_TYPE;
+		typedef std::variant<INT, FLOAT, STRING, Object, Reference> LIST_TYPE;
 		typedef std::vector<LIST_TYPE> LIST;
-		typedef std::variant<INT, FLOAT, STRING, Reference, LIST> TYPE;
+		typedef std::variant<INT, FLOAT, STRING, Object, Reference, LIST> TYPE;
 		typedef std::vector<std::vector<TYPE>> STACK;
+		typedef std::vector<TYPE> HEAP;
 		typedef std::vector<std::vector<Name>> NAMES;
 		typedef std::vector<size_t> JUMPSTACK;
+		typedef std::vector<Class> CSTACK;
 
+		CSTACK cstack; // stores class definitions
 		STACK stack;
 		STACK params;
+		HEAP heap;
 		NAMES names;
 		JUMPSTACK js;
 
@@ -39,6 +45,7 @@ namespace sda
 
 		Name& getName(std::string const& name);
 		TYPE& getNameValue(std::string const& name);
+		Class getClass(std::string const& name);
 		void deref(TYPE& ref);
 
 		void newstack();
@@ -58,6 +65,8 @@ namespace sda
 		void assign();
 		void pushname(std::string const& name);
 		void pushlistindex();
+		void pushnewobject(std::string const& className);
+		void pushmember(std::string const& name);
 
 		void add();
 		void sub();
