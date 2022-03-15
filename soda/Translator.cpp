@@ -109,10 +109,28 @@ namespace sda
 				i += 3;
 			}
 			else if (type == TT::DOT) {
-				bytecode << Byte("pop", "0");
-				bytecode << Byte("pushmember", tokens.at(i + 1).getName());
-				bytecode << Byte("pushbackref", "0");
-				i += 2;
+				if (tokens.at(i + 2).getType() == TT::LBRACKET) {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte("newparamstack", "0");
+					bytecode << Byte("pushparam", "0");
+					bytecode << Byte("pop", "0");
+					if (tokens.at(i + 3).getType() == TT::RBRACKET) {
+						bytecode << Byte("call", tokens.at(i + 1).getName());
+						bytecode << Byte("pushreturnvalue", "0");
+						bytecode << Byte("pushbackref", "0");
+						i += 4;
+					}
+					else {
+						istack << Instruction("functioncall", tokens.at(i + 1).getName());
+						i += 3;
+					}
+				}
+				else {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte("pushmember", tokens.at(i + 1).getName());
+					bytecode << Byte("pushbackref", "0");
+					i += 2;
+				}
 			}
 			else if (type == TT::LSQUAREBRACE) {
 				bytecode << Byte("pop", "0");
@@ -171,6 +189,9 @@ namespace sda
 				else if (istack.back().getInstruction() == "functionparams") {
 					if (tokens.at(i + 1).getType() == TT::LBRACKET) {
 						bytecode << Byte("function", name);
+						if (istack.at(istack.size() - 2).getInstruction() == "classdef") {
+							bytecode << Byte("varparam", "this");
+						}
 						i += 2;
 						continue;
 					}

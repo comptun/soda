@@ -427,7 +427,16 @@ namespace sda
 	void BytecodeInterpreter::pushlistindex()
 	{
 		size_t index = std::get<INT>(this->stack.back().at(this->stack.back().size() - 1));
-		LIST list = std::get<LIST>(this->stack.back().at(this->stack.back().size() - 2));
+		LIST list;
+		if (std::holds_alternative<Reference>(this->stack.back().at(this->stack.back().size() - 2))) {
+			Reference r = std::get<Reference>(this->stack.back().at(this->stack.back().size() - 2));
+			if (r.stackFrame() == -1) {
+				list = std::get<LIST>(heap.at(r.address()));
+			}
+		}
+		else {
+			list = std::get<LIST>(this->stack.back().at(this->stack.back().size() - 2));
+		}
 		LIST_TYPE t = list.at(index);
 		TYPE item;
 		if (std::holds_alternative<INT>(t)) {
@@ -516,6 +525,12 @@ namespace sda
 			}
 			else if (opcode == "return") {
 				this->RETURN = stack.back().back();
+				if (std::holds_alternative<Reference>(RETURN)) {
+					Reference r = std::get<Reference>(RETURN);
+					if (r.stackFrame() == -1) {
+						RETURN = this->heap.at(r.address());
+					}
+				}
 				i = js.back();
 				js.pop_back();
 				continue;
