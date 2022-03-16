@@ -35,7 +35,6 @@ namespace sda
 		CSTACK cstack; // stores class definitions
 		STACK stack;
 		STACK params;
-		HEAP heap;
 		NAMES names;
 		JUMPSTACK js;
 
@@ -46,7 +45,6 @@ namespace sda
 		Name& getName(std::string const& name);
 		TYPE& getNameValue(std::string const& name);
 		Class getClass(std::string const& name);
-		void deref(TYPE& ref);
 
 		void newstack();
 		void popstack();
@@ -56,6 +54,8 @@ namespace sda
 		void newparamstack();
 		void popparamstack();
 
+		TYPE& deref(Reference ref);
+		TYPE& tracebackReference(TYPE& ref);
 		void push(std::string const& data); // Pushes given data onto the stack
 		void pop(); // "Pops" and frees data from the stack
 		void pushparam(); // Pushes parameter from regular stack onto paramater stack for usage in functions

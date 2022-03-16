@@ -21,11 +21,11 @@ namespace sda
 
 	Name& BytecodeInterpreter::getName(std::string const& name)
 	{
-		for (auto n : names.front()) { // Checks global variables
+		for (auto n : names.at(1)) { // Checks global variables
 			if (n.name() == name)
 				return n;
 		}
-		if (names.size() > 1) { // Checks if program is beyond global scope
+		if (names.size() > 2) { // Checks if program is beyond global scope
 			for (auto n : names.back()) { // Checks variables in local scope
 				if (n.name() == name)
 					return n;
@@ -47,12 +47,6 @@ namespace sda
 		return this->stack.at(n.reference().stackFrame()).at(n.reference().address());
 	}
 
-	void BytecodeInterpreter::deref(TYPE& ref)
-	{
-		Reference r = std::get<Reference>(ref);
-		ref = this->stack.at(r.stackFrame()).at(r.address());
-	}
-
 	void BytecodeInterpreter::newstack() { this->stack.push_back(std::vector<TYPE>()); }
 	void BytecodeInterpreter::popstack() { this->stack.pop_back(); }
 	void BytecodeInterpreter::newnames() { this->names.push_back(std::vector<Name>()); }
@@ -60,6 +54,20 @@ namespace sda
 
 	void BytecodeInterpreter::newparamstack() { this->params.push_back(std::vector<TYPE>()); }
 	void BytecodeInterpreter::popparamstack() { this->params.pop_back(); };
+
+	BytecodeInterpreter::TYPE& BytecodeInterpreter::deref(Reference ref)
+	{
+		return stack.at(ref.stackFrame()).at(ref.address());
+	}
+
+	BytecodeInterpreter::TYPE& BytecodeInterpreter::tracebackReference(TYPE& ref)
+	{
+		if (std::holds_alternative<Reference>(ref)) {
+			Reference r = std::get<Reference>(ref);
+			return this->stack.at(r.stackFrame()).at(r.address());
+		}
+		return ref;
+	}
 
 	void BytecodeInterpreter::push(std::string const& data)
 	{
@@ -86,8 +94,8 @@ namespace sda
 		TYPE param = this->stack.back().back();
 		if (std::holds_alternative<Reference>(param)) {
 			Reference r = std::get<Reference>(param);
-			if (r.stackFrame() == -1) {
-				this->params.back().push_back(this->heap.at(r.address()));
+			if (r.stackFrame() == 0) {
+				this->params.back().push_back(this->stack.at(0).at(r.address()));
 				return;
 			}
 		}
@@ -118,24 +126,8 @@ namespace sda
 	void BytecodeInterpreter::assign()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-
-				if (std::holds_alternative<Reference>(RHS)) {
-					Reference r2 = std::get<Reference>(RHS);
-					if (r2.stackFrame() == -1) {
-						RHS = this->heap.at(r2.address());
-					}
-				}
-
-				this->heap.at((r.address())) = RHS;
-				return;
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<Reference>(RHS)) {
 			TYPE& RHS = this->stack.back().back();
@@ -152,24 +144,8 @@ namespace sda
 	void BytecodeInterpreter::add()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-
-				if (std::holds_alternative<Reference>(RHS)) {
-					Reference r2 = std::get<Reference>(RHS);
-					if (r2.stackFrame() == -1) {
-						RHS = this->heap.at((r2.address()));
-					}
-				}
-
-				this->heap.at((r.address())) = RHS;
-				return;
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) += std::get<INT>(RHS);
@@ -184,21 +160,8 @@ namespace sda
 	void BytecodeInterpreter::sub()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) -= std::get<INT>(RHS);
@@ -213,21 +176,8 @@ namespace sda
 	void BytecodeInterpreter::mul()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) *= std::get<INT>(RHS);
@@ -242,21 +192,8 @@ namespace sda
 	void BytecodeInterpreter::div()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(RHS))
 			if (std::get<INT>(RHS) == 0) {
@@ -283,21 +220,8 @@ namespace sda
 	void BytecodeInterpreter::mod()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(RHS))
 			if (std::get<INT>(RHS) == 0) {
@@ -312,21 +236,8 @@ namespace sda
 	void BytecodeInterpreter::bitwiseand()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) &= std::get<INT>(RHS);
@@ -335,21 +246,8 @@ namespace sda
 	void BytecodeInterpreter::bitwiseor()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) |= std::get<INT>(RHS);
@@ -358,21 +256,8 @@ namespace sda
 	void BytecodeInterpreter::bitwisexor()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) ^= std::get<INT>(RHS);
@@ -381,21 +266,8 @@ namespace sda
 	void BytecodeInterpreter::lshift()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) <<= std::get<INT>(RHS);
@@ -404,21 +276,8 @@ namespace sda
 	void BytecodeInterpreter::rshift()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
-		TYPE RHS = this->stack.back().back();
-
-		if (std::holds_alternative<Reference>(LHS)) {
-			Reference r = std::get<Reference>(LHS);
-			if (r.stackFrame() == -1) {
-				LHS = this->heap.at((r.address()));
-			}
-		}
-		if (std::holds_alternative<Reference>(RHS)) {
-			Reference r = std::get<Reference>(RHS);
-			if (r.stackFrame() == -1) {
-				RHS = this->heap.at((r.address()));
-			}
-		}
+		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
 			std::get<INT>(LHS) >>= std::get<INT>(RHS);
@@ -427,16 +286,7 @@ namespace sda
 	void BytecodeInterpreter::pushlistindex()
 	{
 		size_t index = std::get<INT>(this->stack.back().at(this->stack.back().size() - 1));
-		LIST list;
-		if (std::holds_alternative<Reference>(this->stack.back().at(this->stack.back().size() - 2))) {
-			Reference r = std::get<Reference>(this->stack.back().at(this->stack.back().size() - 2));
-			if (r.stackFrame() == -1) {
-				list = std::get<LIST>(heap.at(r.address()));
-			}
-		}
-		else {
-			list = std::get<LIST>(this->stack.back().at(this->stack.back().size() - 2));
-		}
+		LIST list = std::get<LIST>(this->tracebackReference(this->stack.back().at(this->stack.back().size() - 2)));
 		LIST_TYPE t = list.at(index);
 		TYPE item;
 		if (std::holds_alternative<INT>(t)) {
@@ -459,8 +309,8 @@ namespace sda
 	{
 		Object obj = Object(this->getClass(className));
 		for (auto& i : obj.getMembers()) {
-			heap.push_back(0);
-			i.reference().address() = heap.size() - 1;
+			stack.at(0).push_back(0);
+			i.reference().address() = stack.at(0).size() - 1;
 		}
 		this->stack.back().push_back(obj);
 	}
@@ -483,7 +333,10 @@ namespace sda
 
 	void BytecodeInterpreter::interpret(Bytecode& bytecode)
 	{
-		this->names.push_back(std::vector<Name>());
+		this->names.push_back(std::vector<Name>()); // "heap" memory
+		this->stack.push_back(std::vector<TYPE>());
+
+		this->names.push_back(std::vector<Name>()); // global stack scope
 		this->stack.push_back(std::vector<TYPE>());
 
 		for (size_t i = 0; i < bytecode.size(); ++i) {
@@ -521,14 +374,14 @@ namespace sda
 				cstack.push_back(Class(data));
 			}
 			else if (opcode == "member") {
-				cstack.back().addMember(Name(data, Reference(0, -1)));
+				cstack.back().addMember(Name(data, Reference(0, 0)));
 			}
 			else if (opcode == "return") {
 				this->RETURN = stack.back().back();
 				if (std::holds_alternative<Reference>(RETURN)) {
 					Reference r = std::get<Reference>(RETURN);
-					if (r.stackFrame() == -1) {
-						RETURN = this->heap.at(r.address());
+					if (r.stackFrame() == 0) {
+						RETURN = this->stack.at(0).at(r.address());
 					}
 				}
 				i = js.back();
@@ -593,7 +446,7 @@ namespace sda
 				}
 				else {
 					js.push_back(i + 1);
-					i = std::get<INT>(this->stack.front().at(this->getName(data).reference().address())) - 1;
+					i = std::get<INT>(this->stack.at(1).at(this->getName(data).reference().address())) - 1;
 					continue;
 				}
 			}
