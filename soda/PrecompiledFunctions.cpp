@@ -58,8 +58,8 @@ namespace sda
 			else if (std::holds_alternative<Reference>(t))
 				l.push_back(std::get<Reference>(t));
 			else if (std::holds_alternative<LIST>(t)) {
-				stack.back().push_back(t);
-				l.push_back(Reference(stack.back().size() - 1, stack.size() - 1));
+				stack.at(0).push_back(t);
+				l.push_back(Reference(stack.back().size() - 1, 0));
 			}
 		}
 		RETURN = l;

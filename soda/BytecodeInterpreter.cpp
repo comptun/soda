@@ -91,15 +91,9 @@ namespace sda
 
 	void BytecodeInterpreter::pushparam()
 	{
-		TYPE param = this->stack.back().back();
-		if (std::holds_alternative<Reference>(param)) {
-			Reference r = std::get<Reference>(param);
-			if (r.stackFrame() == 0) {
-				this->params.back().push_back(this->stack.at(0).at(r.address()));
-				return;
-			}
-		}
-		this->params.back().push_back(stack.back().back());
+		TYPE param = this->tracebackReference(this->stack.back().back());
+
+		this->params.back().push_back(param);
 	}
 
 	void BytecodeInterpreter::var(std::string const& name)
@@ -289,6 +283,7 @@ namespace sda
 		LIST list = std::get<LIST>(this->tracebackReference(this->stack.back().at(this->stack.back().size() - 2)));
 		LIST_TYPE t = list.at(index);
 		TYPE item;
+		stack.back().pop_back();
 		if (std::holds_alternative<INT>(t)) {
 			item = std::get<INT>(t);
 		}
@@ -299,6 +294,7 @@ namespace sda
 			item = std::get<STRING>(t);
 		}
 		else if (std::holds_alternative<Reference>(t)) {
+			std::cout << "AAAAAAAAAAAAAAAAAAAAA";
 			Reference r = std::get<Reference>(t);
 			item = std::get<LIST>(this->stack.at(r.stackFrame()).at(r.address()));
 		}
@@ -317,7 +313,7 @@ namespace sda
 
 	void BytecodeInterpreter::pushmember(std::string const& name)
 	{
-		Object& obj = std::get<Object>(this->stack.back().back());
+		Object& obj = std::get<Object>(this->tracebackReference(this->stack.back().back()));
 		for (auto& i : obj.getMembers()) {
 			if (i.name() == name) {
 				this->stack.back().pop_back();
@@ -378,12 +374,7 @@ namespace sda
 			}
 			else if (opcode == "return") {
 				this->RETURN = stack.back().back();
-				if (std::holds_alternative<Reference>(RETURN)) {
-					Reference r = std::get<Reference>(RETURN);
-					if (r.stackFrame() == 0) {
-						RETURN = this->stack.at(0).at(r.address());
-					}
-				}
+
 				i = js.back();
 				js.pop_back();
 				continue;

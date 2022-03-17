@@ -81,6 +81,16 @@ namespace sda
 			type == TT::RIGHTSHIFT;
 	}
 
+	void Translator::optimise()
+	{
+		Bytecode newBytecode;
+		for (size_t i = 0; i < this->bytecode.size(); ++i) {
+			if (bytecode.at(i).getOpcode() == "pop") {
+
+			}
+		}
+	}
+
 	void Translator::translate(TokenList& tokens)
 	{
 		istack << Instruction("start", "EMPTY");
@@ -105,8 +115,19 @@ namespace sda
 				bytecode << Byte("pushnewobject", tokens.at(i + 1).getName());
 				bytecode << Byte("pushparam", "0");
 				bytecode << Byte("pop", "0");
-				istack << Instruction("functioncall", tokens.at(i + 1).getName());
-				i += 3;
+				if (tokens.at(i + 3).getType() == TT::RBRACKET) {
+					bytecode << Byte("newstack", "0");
+					bytecode << Byte("call", tokens.at(i + 1).getName());
+					bytecode << Byte("popstack", "0");
+					bytecode << Byte("popparamstack", "0");
+					bytecode << Byte("pushreturnvalue", "0");
+					bytecode << Byte("pushbackref", "0");
+					i += 4;
+				}
+				else {
+					istack << Instruction("functioncall", tokens.at(i + 1).getName());
+					i += 3;
+				}
 			}
 			else if (type == TT::DOT) {
 				if (tokens.at(i + 2).getType() == TT::LBRACKET) {
@@ -115,7 +136,10 @@ namespace sda
 					bytecode << Byte("pushparam", "0");
 					bytecode << Byte("pop", "0");
 					if (tokens.at(i + 3).getType() == TT::RBRACKET) {
+						bytecode << Byte("newstack", "0");
 						bytecode << Byte("call", tokens.at(i + 1).getName());
+						bytecode << Byte("popstack", "0");
+						bytecode << Byte("popparamstack", "0");
 						bytecode << Byte("pushreturnvalue", "0");
 						bytecode << Byte("pushbackref", "0");
 						i += 4;

@@ -41,8 +41,11 @@ namespace sda
 	}
 	std::ostream& operator<<(std::ostream& out, Bytecode bytes)
 	{
-		for (Byte& byte : bytes.bytecode) {
+		/*for (Byte& byte : bytes.bytecode) {
 			std::cout << byte.getOpcode() << " " << byte.getData() << "\n";
+		}*/
+		for (size_t i = 0; i < bytes.size(); ++i) {
+			std::cout << i << " " << bytes.at(i).getOpcode() << " " << bytes.at(i).getData() << "\n";
 		}
 		return out;
 	}

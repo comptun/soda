@@ -41,6 +41,7 @@ namespace sda
 		Bytecode bytecode;
 		InstructionStack istack;
 		bool isOperator(TT type);
+		void optimise(); // removes any redundancies created by the compiler
 	public:
 		void translate(TokenList& tokens);
 		Bytecode& getBytecode();
