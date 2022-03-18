@@ -185,6 +185,7 @@ namespace sda
 			T("function", TT::FUNCTION),
 			T("var", TT::VAR),
 			T("return", TT::RETURN),
+			T("...", TT::ELLIPSIS),
 			T("=", TT::ASSIGNMENT),
 			T(";", TT::SEMICOLON),
 			T("(", TT::LBRACKET),

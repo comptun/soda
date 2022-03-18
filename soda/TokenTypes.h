@@ -9,6 +9,7 @@ namespace sda
 		FUNCTION,
 		VAR,
 		RETURN,
+		ELLIPSIS,
 		ASSIGNMENT,
 		SEMICOLON,
 		LBRACKET,

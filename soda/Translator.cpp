@@ -84,11 +84,18 @@ namespace sda
 	void Translator::optimise()
 	{
 		Bytecode newBytecode;
-		for (size_t i = 0; i < this->bytecode.size(); ++i) {
-			if (bytecode.at(i).getOpcode() == "pop") {
-
+		for (size_t i = 0; i < this->bytecode.size();) {
+			if (bytecode.at(i).getOpcode() == "pushbackref" && i < this->bytecode.size() - 1) {
+				if (bytecode.at(i + 1).getOpcode() == "pop") {
+					i += 2;
+					continue;
+				}
+				
 			}
+			newBytecode.push_byte(this->bytecode.at(i));
+			i += 1;
 		}
+		this->bytecode = newBytecode;
 	}
 
 	void Translator::translate(TokenList& tokens)
@@ -162,6 +169,12 @@ namespace sda
 				i += 1;
 			}
 			else if (type == TT::RSQUAREBRACE) {
+				if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte(istack.back().getData(), "0");
+					bytecode << Byte("pop", "0");
+					istack.pop();
+				}
 				if (istack.back().getInstruction() == "listindex") {
 					bytecode << Byte("pop", "0");
 					bytecode << Byte("pushlistindex", "0");
@@ -171,6 +184,12 @@ namespace sda
 				}
 			}
 			else if (type == TT::SEMICOLON) {
+				if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte(istack.back().getData(), "0");
+					bytecode << Byte("pop", "0");
+					istack.pop();
+				}
 				if (istack.back().getInstruction() == "assignment") {
 					bytecode << Byte("pop", "0");
 					bytecode << Byte("assign", "0");
@@ -266,9 +285,7 @@ namespace sda
 				}
 				else if (istack.back().getInstruction() == "operator") {
 					bytecode << Byte("pushname", name);
-					bytecode << Byte(istack.back().getData(), "0");
-					bytecode << Byte("pop", "0");
-					istack.pop();
+					bytecode << Byte("pushbackref", "0");
 				}
 				else {
 					bytecode << Byte("pushname", name);
@@ -281,19 +298,17 @@ namespace sda
 				i += 1;
 			}
 			else if (type == TT::NUM || type == TT::STRING) {
+				bytecode << Byte("push", name);
+				bytecode << Byte("pushbackref", "0");
+				i += 1;
+			}
+			else if (isOperator(type)) {
 				if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("push", name);
+					bytecode << Byte("pop", "0");
 					bytecode << Byte(istack.back().getData(), "0");
 					bytecode << Byte("pop", "0");
 					istack.pop();
 				}
-				else {
-					bytecode << Byte("push", name);
-					bytecode << Byte("pushbackref", "0");
-				}
-				i += 1;
-			}
-			else if (isOperator(type)) {
 				if (type == TT::ADD)
 					istack << Instruction("operator", "add");
 				else if (type == TT::SUBTRACT)
@@ -315,12 +330,24 @@ namespace sda
 				i += 1;
 			}
 			else if (type == TT::COMMA) {
+				if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte(istack.back().getData(), "0");
+					bytecode << Byte("pop", "0");
+					istack.pop();
+				}
 				bytecode << Byte("pop", "0");
 				bytecode << Byte("pushparam", "0");
 				bytecode << Byte("pop", "0");
 				i += 1;
 			}
 			else if (type == TT::RBRACKET) {
+				if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("pop", "0");
+					bytecode << Byte(istack.back().getData(), "0");
+					bytecode << Byte("pop", "0");
+					istack.pop();
+				}
 				if (istack.back().getInstruction() == "functionparams") {
 					if (tokens.at(i + 1).getType() == TT::LCURLYBRACE) {
 						std::string funcname = istack.back().getData();
@@ -341,8 +368,7 @@ namespace sda
 					istack.pop();
 					if (istack.back().getInstruction() == "operator") {
 						bytecode << Byte("pushreturnvalue", "0");
-						bytecode << Byte(istack.back().getData(), "0");
-						bytecode << Byte("pop", "0");
+						bytecode << Byte("pushbackref", "0");
 					}
 					else {
 						bytecode << Byte("pushreturnvalue", "0");
@@ -380,5 +406,6 @@ namespace sda
 				i += 1;
 			}
 		}
+		this->optimise();
 	}
 }

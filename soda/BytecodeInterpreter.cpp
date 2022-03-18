@@ -138,7 +138,8 @@ namespace sda
 	void BytecodeInterpreter::add()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -154,7 +155,8 @@ namespace sda
 	void BytecodeInterpreter::sub()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -170,7 +172,8 @@ namespace sda
 	void BytecodeInterpreter::mul()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -186,7 +189,8 @@ namespace sda
 	void BytecodeInterpreter::div()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(RHS))
@@ -214,7 +218,8 @@ namespace sda
 	void BytecodeInterpreter::mod()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(RHS))
@@ -230,7 +235,8 @@ namespace sda
 	void BytecodeInterpreter::bitwiseand()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -240,7 +246,8 @@ namespace sda
 	void BytecodeInterpreter::bitwiseor()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -250,7 +257,8 @@ namespace sda
 	void BytecodeInterpreter::bitwisexor()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -260,7 +268,8 @@ namespace sda
 	void BytecodeInterpreter::lshift()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -270,7 +279,8 @@ namespace sda
 	void BytecodeInterpreter::rshift()
 	{
 		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
-		TYPE& LHS = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
 		TYPE RHS = this->tracebackReference(this->stack.back().back());
 
 		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
@@ -294,7 +304,6 @@ namespace sda
 			item = std::get<STRING>(t);
 		}
 		else if (std::holds_alternative<Reference>(t)) {
-			std::cout << "AAAAAAAAAAAAAAAAAAAAA";
 			Reference r = std::get<Reference>(t);
 			item = std::get<LIST>(this->stack.at(r.stackFrame()).at(r.address()));
 		}
@@ -373,7 +382,7 @@ namespace sda
 				cstack.back().addMember(Name(data, Reference(0, 0)));
 			}
 			else if (opcode == "return") {
-				this->RETURN = stack.back().back();
+				this->RETURN = this->tracebackReference(stack.back().back());
 
 				i = js.back();
 				js.pop_back();
