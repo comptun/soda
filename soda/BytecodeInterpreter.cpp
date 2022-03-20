@@ -146,10 +146,14 @@ namespace sda
 			std::get<INT>(LHS) += std::get<INT>(RHS);
 		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
 			std::get<FLOAT>(LHS) += std::get<FLOAT>(RHS);
-		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS))
-			std::get<FLOAT>(LHS) += std::get<INT>(RHS);
-		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS))
-			std::get<INT>(LHS) += std::get<FLOAT>(RHS);
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS)) {
+			RHS = static_cast<FLOAT>(std::get<INT>(RHS));
+			std::get<FLOAT>(LHS) += std::get<FLOAT>(RHS);
+		}
+		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS)) {
+			LHS = static_cast<FLOAT>(std::get<INT>(LHS));
+			std::get<FLOAT>(LHS) += std::get<FLOAT>(RHS);
+		}
 	}
 
 	void BytecodeInterpreter::sub()
@@ -163,10 +167,14 @@ namespace sda
 			std::get<INT>(LHS) -= std::get<INT>(RHS);
 		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
 			std::get<FLOAT>(LHS) -= std::get<FLOAT>(RHS);
-		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS))
-			std::get<FLOAT>(LHS) -= std::get<INT>(RHS);
-		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS))
-			std::get<INT>(LHS) -= std::get<FLOAT>(RHS);
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS)) {
+			RHS = static_cast<FLOAT>(std::get<INT>(RHS));
+			std::get<FLOAT>(LHS) -= std::get<FLOAT>(RHS);
+		}
+		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS)) {
+			LHS = static_cast<FLOAT>(std::get<INT>(LHS));
+			std::get<FLOAT>(LHS) -= std::get<FLOAT>(RHS);
+		}
 	}
 
 	void BytecodeInterpreter::mul()
@@ -180,10 +188,35 @@ namespace sda
 			std::get<INT>(LHS) *= std::get<INT>(RHS);
 		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
 			std::get<FLOAT>(LHS) *= std::get<FLOAT>(RHS);
-		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS))
-			std::get<FLOAT>(LHS) *= std::get<INT>(RHS);
-		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS))
-			std::get<INT>(LHS) *= std::get<FLOAT>(RHS);
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS)) {
+			RHS = static_cast<FLOAT>(std::get<INT>(RHS));
+			std::get<FLOAT>(LHS) *= std::get<FLOAT>(RHS);
+		}
+		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS)) {
+			LHS = static_cast<FLOAT>(std::get<INT>(LHS));
+			std::get<FLOAT>(LHS) *= std::get<FLOAT>(RHS);
+		}
+	}
+
+	void BytecodeInterpreter::power()
+	{
+		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
+
+		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS))
+			LHS = std::powl(std::get<INT>(LHS), std::get<INT>(RHS));
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
+			LHS = std::powl(std::get<FLOAT>(LHS), std::get<FLOAT>(RHS));
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS)) {
+			RHS = static_cast<FLOAT>(std::get<INT>(RHS));
+			LHS = std::powl(std::get<FLOAT>(LHS), std::get<FLOAT>(RHS));
+		}
+		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS)) {
+			LHS = static_cast<FLOAT>(std::get<INT>(LHS));
+			LHS = std::powl(std::get<FLOAT>(LHS), std::get<FLOAT>(RHS));
+		}
 	}
 
 	void BytecodeInterpreter::div()
@@ -209,10 +242,14 @@ namespace sda
 			std::get<INT>(LHS) /= std::get<INT>(RHS);
 		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS))
 			std::get<FLOAT>(LHS) /= std::get<FLOAT>(RHS);
-		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS))
-			std::get<FLOAT>(LHS) /= std::get<INT>(RHS);
-		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS))
-			std::get<INT>(LHS) /= std::get<FLOAT>(RHS);
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS)) {
+			RHS = static_cast<FLOAT>(std::get<INT>(RHS));
+			std::get<FLOAT>(LHS) /= std::get<FLOAT>(RHS);
+		}
+		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS)) {
+			LHS = static_cast<FLOAT>(std::get<INT>(LHS));
+			std::get<FLOAT>(LHS) /= std::get<FLOAT>(RHS);
+		}
 	}
 
 	void BytecodeInterpreter::mod()
@@ -369,12 +406,31 @@ namespace sda
 			}
 			else if (opcode == "return") {
 				this->RETURN = this->tracebackReference(stack.back().back());
-
+				i = js.back();
+				js.pop_back();
+				continue;
+			}
+			else if (opcode == "returnref") {
+				this->RETURN = stack.back().back();
 				i = js.back();
 				js.pop_back();
 				continue;
 			}
 			else if (opcode == "varparam") {
+				if (data == "...") {
+					this->var("valist");
+					LIST va;
+					for (auto& i : params.back()) {
+						stack.at(0).push_back(i);
+						va.push_back(Reference(stack.at(0).size() - 1, 0));
+					}
+					this->pushref("valist");
+					stack.back().push_back(va);
+					this->assign();
+					this->pop();
+					this->pop();
+					continue;
+				}
 				this->var(data);
 				this->stack.back().at(this->getName(data).reference().address()) = this->params.back().front();
 				params.back().erase(params.back().begin());
@@ -390,6 +446,9 @@ namespace sda
 			}
 			else if (opcode == "pushname") {
 				this->pushname(data);
+			}
+			else if (opcode == "pow") {
+				this->power();
 			}
 			else if (opcode == "add") {
 				this->add();
