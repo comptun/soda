@@ -7,7 +7,7 @@ namespace sda
 		srand((unsigned)time(0));
 
 		lex("main.soda");
-		translate(getTokens());
+		translate(getTokens()); 
 		//std::cout << getBytecode();
 		interpret(getBytecode());
 		std::cin.get();
