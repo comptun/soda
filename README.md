@@ -5,6 +5,7 @@ Example Program:
 
 ```javascript
 import "io"
+
 class Point {
   var x;
   var y;
@@ -13,9 +14,11 @@ class Point {
     this.y = y;
   }
 }
+
 function main() {
   var pos = new Point(100, 200);
   con.out("X: ", pos.x, " Y: ", pos.y, "\n");
 }
+
 main();
 ```
