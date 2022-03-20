@@ -23,8 +23,7 @@ namespace sda
 		typedef long double FLOAT;
 		typedef std::string STRING;
 
-		typedef std::variant<INT, FLOAT, STRING, Object, Reference> LIST_TYPE;
-		typedef std::vector<LIST_TYPE> LIST;
+		typedef std::vector<Reference> LIST;
 		typedef std::variant<INT, FLOAT, STRING, Object, Reference, LIST> TYPE;
 		typedef std::vector<std::vector<TYPE>> STACK;
 		typedef std::vector<TYPE> HEAP;
