@@ -391,9 +391,7 @@ namespace sda
 			else if (opcode == "varparam") {
 				this->var(data);
 				this->stack.back().at(this->getName(data).reference().address()) = this->params.back().front();
-				std::reverse(params.back().begin(), params.back().end());
-				params.back().pop_back();
-				std::reverse(params.back().begin(), params.back().end());
+				params.back().erase(params.back().begin());
 			}
 			else if (opcode == "pushref") {
 				this->pushref(data);

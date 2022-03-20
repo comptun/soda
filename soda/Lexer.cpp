@@ -173,6 +173,29 @@ namespace sda
 		//std::cout << this->tokens;
 	}
 
+	void Lexer::lexString(std::string const& str)
+	{
+		for (size_t i = 0; i < str.size();) {
+			Token potentialToken = this->getSpecialToken(str, i);
+			if (potentialToken != Token()) {
+				this->push_token(potentialToken);
+				i += potentialToken.getName().size();
+				continue;
+			}
+			else if (!this->isWhitespace(str.at(i))) {
+				Token potentialName = this->getName(str, i);
+				this->push_token(potentialName);
+				if (potentialName.getType() == TT::STRING) {
+					i += potentialName.getName().size() + 2;
+					continue;
+				}
+				i += potentialName.getName().size();
+				continue;
+			}
+			i += 1;
+		}
+	}
+
 	TokenList& Lexer::getTokens()
 	{
 		return this->tokens;

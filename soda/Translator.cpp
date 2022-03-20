@@ -92,6 +92,13 @@ namespace sda
 				}
 				
 			}
+			if (bytecode.at(i).getOpcode() == "push" && i < this->bytecode.size() - 1) {
+				if (bytecode.at(i + 1).getOpcode() == "return" && bytecode.at(i - 1).getOpcode() == "return") {
+					i += 2;
+					continue;
+				}
+
+			}
 			newBytecode.push_byte(this->bytecode.at(i));
 			i += 1;
 		}
@@ -118,17 +125,17 @@ namespace sda
 				i += 3;
 			}
 			else if (name == "new") {
-				bytecode << Byte("newparamstack", "0");
+				bytecode << Byte("newparamstack");
 				bytecode << Byte("pushnewobject", tokens.at(i + 1).getName());
-				bytecode << Byte("pushparam", "0");
-				bytecode << Byte("pop", "0");
+				bytecode << Byte("pushparam");
+				bytecode << Byte("pop");
 				if (tokens.at(i + 3).getType() == TT::RBRACKET) {
-					bytecode << Byte("newstack", "0");
+					bytecode << Byte("newstack");
 					bytecode << Byte("call", tokens.at(i + 1).getName());
-					bytecode << Byte("popstack", "0");
-					bytecode << Byte("popparamstack", "0");
-					bytecode << Byte("pushreturnvalue", "0");
-					bytecode << Byte("pushbackref", "0");
+					bytecode << Byte("popparamstack");
+					bytecode << Byte("popstack");
+					bytecode << Byte("pushreturnvalue");
+					bytecode << Byte("pushbackref");
 					i += 4;
 				}
 				else {
@@ -138,17 +145,17 @@ namespace sda
 			}
 			else if (type == TT::DOT) {
 				if (tokens.at(i + 2).getType() == TT::LBRACKET) {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte("newparamstack", "0");
-					bytecode << Byte("pushparam", "0");
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte("newparamstack");
+					bytecode << Byte("pushparam");
+					bytecode << Byte("pop");
 					if (tokens.at(i + 3).getType() == TT::RBRACKET) {
-						bytecode << Byte("newstack", "0");
+						bytecode << Byte("newstack");
 						bytecode << Byte("call", tokens.at(i + 1).getName());
-						bytecode << Byte("popstack", "0");
-						bytecode << Byte("popparamstack", "0");
-						bytecode << Byte("pushreturnvalue", "0");
-						bytecode << Byte("pushbackref", "0");
+						bytecode << Byte("popparamstack");
+						bytecode << Byte("popstack");
+						bytecode << Byte("pushreturnvalue");
+						bytecode << Byte("pushbackref");
 						i += 4;
 					}
 					else {
@@ -157,49 +164,49 @@ namespace sda
 					}
 				}
 				else {
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
 					bytecode << Byte("pushmember", tokens.at(i + 1).getName());
-					bytecode << Byte("pushbackref", "0");
+					bytecode << Byte("pushbackref");
 					i += 2;
 				}
 			}
 			else if (type == TT::LSQUAREBRACE) {
-				bytecode << Byte("pop", "0");
+				bytecode << Byte("pop");
 				istack << Instruction("listindex", "0");
 				i += 1;
 			}
 			else if (type == TT::RSQUAREBRACE) {
 				if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte(istack.back().getData(), "0");
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
 					istack.pop();
 				}
 				if (istack.back().getInstruction() == "listindex") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte("pushlistindex", "0");
-					bytecode << Byte("pushbackref", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte("pushlistindex");
+					bytecode << Byte("pushbackref");
 					istack.pop();
 					i += 1;
 				}
 			}
 			else if (type == TT::SEMICOLON) {
 				if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte(istack.back().getData(), "0");
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
 					istack.pop();
 				}
 				if (istack.back().getInstruction() == "assignment") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte("assign", "0");
-					bytecode << Byte("pop", "0");
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte("assign");
+					bytecode << Byte("pop");
+					bytecode << Byte("pop");
 					istack.pop();
 				}
 				else if (istack.back().getInstruction() == "return") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte("return", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte("return");
 					istack.pop();
 				}
 				i += 1;
@@ -250,28 +257,28 @@ namespace sda
 				else if (tokens.at(i + 1).getType() == TT::LBRACKET) {
 					if (name == "ref" && tokens.at(i + 2).getType() == TT::NAME && tokens.at(i + 3).getType() == TT::RBRACKET) {
 						bytecode << Byte("pushref", tokens.at(i + 2).getName());
-						bytecode << Byte("pushbackref", "0");
+						bytecode << Byte("pushbackref");
 						i += 4;
 						continue;
 					}
 					else {
-						bytecode << Byte("newparamstack", "0");
+						bytecode << Byte("newparamstack");
 						istack << Instruction("functioncall", tokens.at(i).getName());
 						if (tokens.at(i + 2).getType() == TT::RBRACKET) {
-							bytecode << Byte("newstack", "0");
+							bytecode << Byte("newstack");
 							bytecode << Byte("call", name);
-							bytecode << Byte("popparamstack", "0");
-							bytecode << Byte("popstack", "0");
+							bytecode << Byte("popparamstack");
+							bytecode << Byte("popstack");
 							istack.pop();
 							if (istack.back().getInstruction() == "operator") {
-								bytecode << Byte("pushreturnvalue", "0");
-								bytecode << Byte(istack.back().getData(), "0");
-								bytecode << Byte("pop", "0");
+								bytecode << Byte("pushreturnvalue");
+								bytecode << Byte(istack.back().getData());
+								bytecode << Byte("pop");
 								istack.pop();
 							}
 							else {
-								bytecode << Byte("pushreturnvalue", "0");
-								bytecode << Byte("pushbackref", "0");
+								bytecode << Byte("pushreturnvalue");
+								bytecode << Byte("pushbackref");
 							}
 							i += 3;
 							continue;
@@ -283,13 +290,10 @@ namespace sda
 				else if (tokens.at(i + 1).getType() == TT::ASSIGNMENT) {
 					bytecode << Byte("pushref", name);
 				}
-				else if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("pushname", name);
-					bytecode << Byte("pushbackref", "0");
-				}
 				else {
-					bytecode << Byte("pushname", name);
-					bytecode << Byte("pushbackref", "0");
+					//bytecode << Byte("pushname", name);
+					bytecode << Byte("pushref", name);
+					bytecode << Byte("pushbackref");
 				}
 				i += 1;
 			}
@@ -299,14 +303,14 @@ namespace sda
 			}
 			else if (type == TT::NUM || type == TT::STRING) {
 				bytecode << Byte("push", name);
-				bytecode << Byte("pushbackref", "0");
+				bytecode << Byte("pushbackref");
 				i += 1;
 			}
 			else if (isOperator(type)) {
 				if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte(istack.back().getData(), "0");
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
 					istack.pop();
 				}
 				if (type == TT::ADD)
@@ -331,21 +335,29 @@ namespace sda
 			}
 			else if (type == TT::COMMA) {
 				if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte(istack.back().getData(), "0");
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
 					istack.pop();
 				}
-				bytecode << Byte("pop", "0");
-				bytecode << Byte("pushparam", "0");
-				bytecode << Byte("pop", "0");
+				if (istack.back().getInstruction() == "assignment") {
+					bytecode << Byte("pop");
+					bytecode << Byte("assign");
+					bytecode << Byte("pop");
+					bytecode << Byte("pop");
+				}
+				if (istack.back().getInstruction() == "functioncall") {
+					bytecode << Byte("pop");
+					bytecode << Byte("pushparam");
+					bytecode << Byte("pop");
+				}
 				i += 1;
 			}
 			else if (type == TT::RBRACKET) {
 				if (istack.back().getInstruction() == "operator") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte(istack.back().getData(), "0");
-					bytecode << Byte("pop", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
 					istack.pop();
 				}
 				if (istack.back().getInstruction() == "functionparams") {
@@ -358,21 +370,21 @@ namespace sda
 					}
 				}
 				else if (istack.back().getInstruction() == "functioncall") {
-					bytecode << Byte("pop", "0");
-					bytecode << Byte("pushparam", "0");
-					bytecode << Byte("pop", "0");
-					bytecode << Byte("newstack", "0");
+					bytecode << Byte("pop");
+					bytecode << Byte("pushparam");
+					bytecode << Byte("pop");
+					bytecode << Byte("newstack");
 					bytecode << Byte("call", istack.back().getData());
-					bytecode << Byte("popparamstack", "0");
-					bytecode << Byte("popstack", "0");
+					bytecode << Byte("popparamstack");
+					bytecode << Byte("popstack");
 					istack.pop();
 					if (istack.back().getInstruction() == "operator") {
-						bytecode << Byte("pushreturnvalue", "0");
-						bytecode << Byte("pushbackref", "0");
+						bytecode << Byte("pushreturnvalue");
+						bytecode << Byte("pushbackref");
 					}
 					else {
-						bytecode << Byte("pushreturnvalue", "0");
-						bytecode << Byte("pushbackref", "0");
+						bytecode << Byte("pushreturnvalue");
+						bytecode << Byte("pushbackref");
 					}
 				}
 				i += 1;
@@ -383,15 +395,16 @@ namespace sda
 			}
 			else if (type == TT::RCURLYBRACE) {
 				if (istack.at(istack.size() - 2).getInstruction() == "constructor") {
-					bytecode << Byte("pushname", "this");
-					bytecode << Byte("return", "0");
+					//bytecode << Byte("pushname", "this");
+					bytecode << Byte("pushref", "this");
+					bytecode << Byte("return");
 					bytecode << Byte("endfunction", istack.back().getData());
 					istack.pop();
 					istack.pop();
 				}
 				else if (istack.back().getInstruction() == "functiondef") {
 					bytecode << Byte("push", "0");
-					bytecode << Byte("return", "0");
+					bytecode << Byte("return");
 					bytecode << Byte("endfunction", istack.back().getData());
 					istack.pop();
 				}

@@ -33,6 +33,7 @@ namespace sda
 		TokenList& getTokens();
 		Token& at(size_t index);
 		void lex(std::string const& filePath);
+		void lexString(std::string const& str);
 		Lexer();
 	};
 }
