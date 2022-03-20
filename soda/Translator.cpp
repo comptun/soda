@@ -78,7 +78,8 @@ namespace sda
 			type == TT::BITWISEOR ||
 			type == TT::BITWISEXOR ||
 			type == TT::LEFTSHIFT ||
-			type == TT::RIGHTSHIFT;
+			type == TT::RIGHTSHIFT ||
+			type == TT::DOUBLESTAR;
 	}
 
 	void Translator::optimise()
@@ -209,6 +210,11 @@ namespace sda
 					bytecode << Byte("return");
 					istack.pop();
 				}
+				else if (istack.back().getInstruction() == "returnref") {
+					bytecode << Byte("pop");
+					bytecode << Byte("returnref");
+					istack.pop();
+				}
 				i += 1;
 			}
 			else if (type == TT::VAR) {
@@ -255,37 +261,29 @@ namespace sda
 					}
 				}
 				else if (tokens.at(i + 1).getType() == TT::LBRACKET) {
-					if (name == "ref" && tokens.at(i + 2).getType() == TT::NAME && tokens.at(i + 3).getType() == TT::RBRACKET) {
-						bytecode << Byte("pushref", tokens.at(i + 2).getName());
-						bytecode << Byte("pushbackref");
-						i += 4;
-						continue;
-					}
-					else {
-						bytecode << Byte("newparamstack");
-						istack << Instruction("functioncall", tokens.at(i).getName());
-						if (tokens.at(i + 2).getType() == TT::RBRACKET) {
-							bytecode << Byte("newstack");
-							bytecode << Byte("call", name);
-							bytecode << Byte("popparamstack");
-							bytecode << Byte("popstack");
+					bytecode << Byte("newparamstack");
+					istack << Instruction("functioncall", tokens.at(i).getName());
+					if (tokens.at(i + 2).getType() == TT::RBRACKET) {
+						bytecode << Byte("newstack");
+						bytecode << Byte("call", name);
+						bytecode << Byte("popparamstack");
+						bytecode << Byte("popstack");
+						istack.pop();
+						if (istack.back().getInstruction() == "operator") {
+							bytecode << Byte("pushreturnvalue");
+							bytecode << Byte(istack.back().getData());
+							bytecode << Byte("pop");
 							istack.pop();
-							if (istack.back().getInstruction() == "operator") {
-								bytecode << Byte("pushreturnvalue");
-								bytecode << Byte(istack.back().getData());
-								bytecode << Byte("pop");
-								istack.pop();
-							}
-							else {
-								bytecode << Byte("pushreturnvalue");
-								bytecode << Byte("pushbackref");
-							}
-							i += 3;
-							continue;
 						}
-						i += 2;
+						else {
+							bytecode << Byte("pushreturnvalue");
+							bytecode << Byte("pushbackref");
+						}
+						i += 3;
 						continue;
 					}
+					i += 2;
+					continue;
 				}
 				else if (tokens.at(i + 1).getType() == TT::ASSIGNMENT) {
 					bytecode << Byte("pushref", name);
@@ -331,6 +329,8 @@ namespace sda
 					istack << Instruction("operator", "lshift");
 				else if (type == TT::RIGHTSHIFT)
 					istack << Instruction("operator", "rshift");
+				else if (type == TT::DOUBLESTAR)
+					istack << Instruction("operator", "pow");
 				i += 1;
 			}
 			else if (type == TT::COMMA) {
@@ -416,6 +416,23 @@ namespace sda
 			}
 			else if (type == TT::RETURN) {
 				istack << Instruction("return", "0");
+				i += 1;
+			}
+			else if (name == "returnref") {
+				istack << Instruction("returnref", "0");
+				i += 1;
+			}
+			else if (type == TT::ELLIPSIS) {
+				if (istack.back().getInstruction() == "functionparams") {
+					if (tokens.at(i + 1).getType() == TT::COMMA || tokens.at(i + 1).getType() == TT::RBRACKET) {
+						bytecode << Byte("varparam", name);
+						if (tokens.at(i + 1).getType() == TT::COMMA)
+							i += 2;
+						else
+							i += 1;
+						continue;
+					}
+				}
 				i += 1;
 			}
 		}

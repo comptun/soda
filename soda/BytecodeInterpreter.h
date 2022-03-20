@@ -77,6 +77,7 @@ namespace sda
 		void bitwisexor();
 		void lshift();
 		void rshift();
+		void power();
 
 	public:
 
