@@ -70,6 +70,21 @@ namespace sda
 		RETURN = (std::rand() % (upperBound - lowerBound)) + lowerBound;
 	}
 
+	void PrecompiledFunctions::disassemble(STRING str)
+	{
+		Lexer l = Lexer();
+		l.lexString(str);
+		TokenList tokens = l.getTokens();
+		Translator t = Translator();
+		t.translate(tokens);
+		std::cout << t.getBytecode();
+	}
+
+	void PrecompiledFunctions::bytecode(LIST bc)
+	{
+
+	}
+
 	PrecompiledFunctions::TYPE PrecompiledFunctions::getReturnValue()
 	{
 		return this->RETURN;
@@ -113,6 +128,13 @@ namespace sda
 		else if (name == "concat") {
 			RETURN = params.front();
 			return true;
+		}
+		else if (name == "disassemble") {
+			this->disassemble(std::get<STRING>(params.at(0)));
+			return true;
+		}
+		else if (name == "execute") {
+			//this->execute(std::get<LIST>(params.at(0)));
 		}
 
 		return false;

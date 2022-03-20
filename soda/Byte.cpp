@@ -19,6 +19,11 @@ namespace sda
 	{
 		return this->data;
 	}
+	Byte::Byte(std::string const& opcode)
+	{
+		this->opcode = opcode;
+		this->data = "";
+	}
 	Byte::Byte(std::string const& opcode, std::string const& data)
 	{
 		this->opcode = opcode;

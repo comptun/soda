@@ -3,6 +3,8 @@
 
 #include "Reference.h"
 #include "Object.h"
+#include "Lexer.h"
+#include "Translator.h"
 
 #include <string>
 #include <vector>
@@ -34,6 +36,8 @@ namespace sda
 		void input(PARAMS& params);
 		void list(PARAMS& params, STACK& stack);
 		void rand(INT lowerBound, INT upperBound);
+		void disassemble(STRING str);
+		void bytecode(LIST bc);
 
 	public:
 		TYPE getReturnValue();

@@ -18,6 +18,7 @@ namespace sda
 		void setData(std::string const& data);
 		std::string& getOpcode();
 		std::string& getData();
+		Byte(std::string const& opcode);
 		Byte(std::string const& opcode, std::string const& data);
 		Byte();
 	};
