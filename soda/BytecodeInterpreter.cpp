@@ -289,25 +289,11 @@ namespace sda
 
 	void BytecodeInterpreter::pushlistindex()
 	{
-		size_t index = std::get<INT>(this->stack.back().at(this->stack.back().size() - 1));
+		size_t index = std::get<INT>(this->tracebackReference(this->stack.back().at(this->stack.back().size() - 1)));
 		LIST list = std::get<LIST>(this->tracebackReference(this->stack.back().at(this->stack.back().size() - 2)));
-		LIST_TYPE t = list.at(index);
-		TYPE item;
-		stack.back().pop_back();
-		if (std::holds_alternative<INT>(t)) {
-			item = std::get<INT>(t);
-		}
-		else if (std::holds_alternative<FLOAT>(t)) {
-			item = std::get<FLOAT>(t);
-		}
-		else if (std::holds_alternative<STRING>(t)) {
-			item = std::get<STRING>(t);
-		}
-		else if (std::holds_alternative<Reference>(t)) {
-			Reference r = std::get<Reference>(t);
-			item = std::get<LIST>(this->stack.at(r.stackFrame()).at(r.address()));
-		}
-		this->stack.back().push_back(item);
+		Reference t = list.at(index);
+		
+		this->stack.back().push_back(t);
 	}
 
 	void BytecodeInterpreter::pushnewobject(std::string const& className)

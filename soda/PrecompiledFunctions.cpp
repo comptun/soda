@@ -49,18 +49,8 @@ namespace sda
 	{
 		LIST l;
 		for (auto& t : params) {
-			if (std::holds_alternative<INT>(t))
-				l.push_back(std::get<INT>(t));
-			else if (std::holds_alternative<FLOAT>(t))
-				l.push_back(std::get<FLOAT>(t));
-			else if (std::holds_alternative<STRING>(t))
-				l.push_back(std::get<STRING>(t));
-			else if (std::holds_alternative<Reference>(t))
-				l.push_back(std::get<Reference>(t));
-			else if (std::holds_alternative<LIST>(t)) {
-				stack.at(0).push_back(t);
-				l.push_back(Reference(stack.back().size() - 1, 0));
-			}
+			stack.front().push_back(t);
+			l.push_back(Reference(stack.front().size() - 1, 0));
 		}
 		RETURN = l;
 	}
@@ -83,6 +73,18 @@ namespace sda
 	void PrecompiledFunctions::bytecode(LIST bc)
 	{
 
+	}
+
+	void PrecompiledFunctions::push(STACK& stack, LIST list, TYPE item)
+	{
+		stack.at(0).push_back(item);
+		list.push_back(Reference(stack.at(0).size() - 1, 0));
+		RETURN = list;
+	}
+	void PrecompiledFunctions::pop(LIST list)
+	{
+		list.pop_back();
+		RETURN = list;
 	}
 
 	PrecompiledFunctions::TYPE PrecompiledFunctions::getReturnValue()
@@ -135,6 +137,14 @@ namespace sda
 		}
 		else if (name == "execute") {
 			//this->execute(std::get<LIST>(params.at(0)));
+		}
+		else if (name == "push") {
+			this->push(stack, std::get<LIST>(params.at(0)), params.at(1));
+			return true;
+		}
+		else if (name == "pop") {
+			this->pop(std::get<LIST>(params.at(0)));
+			return true;
 		}
 
 		return false;

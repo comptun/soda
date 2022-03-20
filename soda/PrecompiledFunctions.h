@@ -20,8 +20,7 @@ namespace sda
 		typedef long double FLOAT;
 		typedef std::string STRING;
 
-		typedef std::variant<INT, FLOAT, STRING, Object, Reference> LIST_TYPE;
-		typedef std::vector<LIST_TYPE> LIST;
+		typedef std::vector<Reference> LIST;
 		typedef std::variant<INT, FLOAT, STRING, Object, Reference, LIST> TYPE;
 		typedef std::vector<TYPE> PARAMS;
 		typedef std::vector<std::vector<TYPE>> STACK;
@@ -38,6 +37,8 @@ namespace sda
 		void rand(INT lowerBound, INT upperBound);
 		void disassemble(STRING str);
 		void bytecode(LIST bc);
+		void push(STACK& stack, LIST list, TYPE item);
+		void pop(LIST list);
 
 	public:
 		TYPE getReturnValue();
