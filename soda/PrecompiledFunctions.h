@@ -31,6 +31,8 @@ namespace sda
 		void putstr(STRING out);
 		void pause();
 		void print(PARAMS& params);
+		void printType(TYPE& p);
+		void printvalist(STACK& stack, LIST& valist);
 		void endl();
 		void input(PARAMS& params);
 		void list(PARAMS& params, STACK& stack);

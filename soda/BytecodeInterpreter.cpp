@@ -488,7 +488,7 @@ namespace sda
 					this->RETURN = this->getReturnValue();
 				}
 				else {
-					js.push_back(i + 1);
+					js.push_back(i);
 					i = std::get<INT>(this->stack.at(1).at(this->getName(data).reference().address())) - 1;
 					continue;
 				}

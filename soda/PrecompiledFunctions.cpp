@@ -32,6 +32,24 @@ namespace sda
 		}
 	}
 
+	void PrecompiledFunctions::printType(TYPE& p)
+	{
+		if (std::holds_alternative<INT>(p))
+			std::cout << std::get<INT>(p);
+		else if (std::holds_alternative<FLOAT>(p))
+			std::cout << std::get<FLOAT>(p);
+		else if (std::holds_alternative<STRING>(p))
+			std::cout << std::get<STRING>(p);
+	}
+
+	void PrecompiledFunctions::printvalist(STACK& stack, LIST& valist)
+	{
+		for (auto& r : valist) {
+			TYPE type = stack.at(r.stackFrame()).at(r.address());
+			this->printType(type);
+		}
+	}
+
 	void PrecompiledFunctions::input(PARAMS& params)
 	{
 		this->print(params);
@@ -109,6 +127,10 @@ namespace sda
 		}
 		else if (name == "print") {
 			this->print(params);
+			return true;
+		}
+		else if (name == "printvalist") {
+			this->printvalist(stack, std::get<LIST>(params.front()));
 			return true;
 		}
 		else if (name == "input") {

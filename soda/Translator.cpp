@@ -93,7 +93,7 @@ namespace sda
 				}
 				
 			}
-			if (bytecode.at(i).getOpcode() == "push" && i < this->bytecode.size() - 1) {
+			else if (bytecode.at(i).getOpcode() == "push" && i < this->bytecode.size() - 1) {
 				if (bytecode.at(i + 1).getOpcode() == "return" && bytecode.at(i - 1).getOpcode() == "return") {
 					i += 2;
 					continue;
