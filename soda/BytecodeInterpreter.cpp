@@ -377,6 +377,26 @@ namespace sda
 			LHS = std::get<STRING>(LHS) == std::get<STRING>(RHS);
 		}
 	}
+	void BytecodeInterpreter::lessthan()
+	{
+		Reference& ref = std::get<Reference>(this->stack.back().at(stack.back().size() - 2));
+		this->stack.at(ref.stackFrame()).at(ref.address()) = this->tracebackReference(this->stack.at(ref.stackFrame()).at(ref.address()));
+		TYPE& LHS = this->stack.at(ref.stackFrame()).at(ref.address());
+		TYPE RHS = this->tracebackReference(this->stack.back().back());
+
+		if (std::holds_alternative<INT>(LHS) && std::holds_alternative<INT>(RHS)) {
+			LHS = std::get<INT>(LHS) < std::get<INT>(RHS);
+		}
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<FLOAT>(RHS)) {
+			LHS = std::get<FLOAT>(LHS) < std::get<FLOAT>(RHS);
+		}
+		else if (std::holds_alternative<FLOAT>(LHS) && std::holds_alternative<INT>(RHS)) {
+			LHS = std::get<FLOAT>(LHS) < std::get<INT>(RHS);
+		}
+		else if (std::holds_alternative<INT>(LHS) && std::holds_alternative<FLOAT>(RHS)) {
+			LHS = std::get<INT>(LHS) < std::get<FLOAT>(RHS);
+		}
+	}
 
 	void BytecodeInterpreter::booland()
 	{
@@ -516,6 +536,9 @@ namespace sda
 			else if (opcode == "div") {
 				this->div();
 			}
+			else if (opcode == "mod") {
+				this->mod();
+			}
 			else if (opcode == "and") {
 				this->bitwiseand();
 			}
@@ -570,6 +593,9 @@ namespace sda
 			else if (opcode == "equalto") {
 				this->equalto();
 			}
+			else if (opcode == "lessthan") {
+				this->lessthan();
+			}
 			else if (opcode == "booland") {
 				this->booland();
 			}
@@ -578,6 +604,15 @@ namespace sda
 			}
 			else if (opcode == "boolxor") {
 				this->boolxor();
+			}
+			else if (opcode == "jumpfalse") {
+				if (!std::get<INT>(stack.back().back())) {
+					i = std::stoi(data);
+				}
+				stack.back().pop_back();
+			}
+			else if (opcode == "jump") {
+				i = std::stoi(data);
 			}
 		}
 	}

@@ -84,6 +84,7 @@ namespace sda
 		// Boolean Operators
 
 		void equalto();
+		void lessthan();
 
 		void booland();
 		void boolor();

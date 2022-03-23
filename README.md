@@ -4,21 +4,30 @@ Soda Programming Language - A sorta Javascript inspired language
 Example Program:
 
 ```javascript
-import "io"
+import "std/io"
+import "std/list"
 
-class Point {
-  var x;
-  var y;
-  Point(x, y) {
-    this.x = x;
-    this.y = y;
-  }
+var map = new List(
+    new List(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    new List(0, 1, 1, 0, 0, 0, 0, 1, 1, 0),
+    new List(0, 1, 1, 0, 0, 0, 0, 1, 1, 0),
+    new List(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    new List(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    new List(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    new List(0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    new List(0, 0, 1, 0, 0, 0, 0, 1, 0, 0),
+    new List(0, 0, 0, 1, 1, 1, 1, 0, 0, 0),
+    new List(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+);
+
+var y = 0;
+while (y < map.size()) {
+    var x = 0;
+    while (x < map.at(y).size()) {
+        console.out(map.at(y).at(x), " ");
+        x = x + 1;
+    }
+    console.out(endl());
+    y = y + 1;
 }
-
-function main() {
-  var pos = new Point(100, 200);
-  con.out("X: ", pos.x, " Y: ", pos.y, "\n");
-}
-
-main();
 ```

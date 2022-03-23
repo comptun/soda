@@ -74,6 +74,7 @@ namespace sda
 			type == TT::SUBTRACT ||
 			type == TT::MULTIPLY ||
 			type == TT::DIVIDE ||
+			type == TT::MODULUS ||
 			type == TT::BITWISEAND ||
 			type == TT::BITWISEOR ||
 			type == TT::BITWISEXOR ||
@@ -81,6 +82,7 @@ namespace sda
 			type == TT::RIGHTSHIFT ||
 			type == TT::DOUBLESTAR ||
 			type == TT::EQUALTO ||
+			type == TT::LESSTHAN ||
 			type == TT::AND ||
 			type == TT::OR ||
 			type == TT::XOR;
@@ -125,12 +127,21 @@ namespace sda
 	void Translator::translate(TokenList& tokens)
 	{
 		istack << Instruction("start", "EMPTY");
+		bytecode << Byte("start");
 		for (size_t i = 0; i < tokens.size();) {
 
 			TT type = tokens.at(i).getType();
 			std::string name = tokens.at(i).getName();
 
-			if (name == "class") {
+			if (name == "if" && tokens.at(i + 1).getType() == TT::LBRACKET) {
+				istack << Instruction("ifstatement", "");
+				i += 2;
+			}
+			else if (name == "while" && tokens.at(i + 1).getType() == TT::LBRACKET) {
+				istack << Instruction("whilestatement", std::to_string(bytecode.size() - 1));
+				i += 2;
+			}
+			else if (name == "class") {
 				bytecode << Byte("class", tokens.at(i + 1).getName());
 				if (tokens.at(i + 2).getType() == TT::LCURLYBRACE) {
 					istack << Instruction("classdef", tokens.at(i + 1).getName());
@@ -364,6 +375,8 @@ namespace sda
 					istack << Instruction("operator", "mul");
 				else if (type == TT::DIVIDE)
 					istack << Instruction("operator", "div");
+				else if (type == TT::MODULUS)
+					istack << Instruction("operator", "mod");
 				else if (type == TT::BITWISEAND)
 					istack << Instruction("operator", "and");
 				else if (type == TT::BITWISEOR)
@@ -376,8 +389,14 @@ namespace sda
 					istack << Instruction("operator", "rshift");
 				else if (type == TT::DOUBLESTAR)
 					istack << Instruction("operator", "pow");
+
+
 				else if (type == TT::EQUALTO)
 					istack << Instruction("booloperator", "equalto");
+				else if (type == TT::LESSTHAN)
+					istack << Instruction("booloperator", "lessthan");
+
+
 				else if (type == TT::AND)
 					istack << Instruction("specialbooloperator", "booland");
 				else if (type == TT::OR)
@@ -460,6 +479,24 @@ namespace sda
 					bytecode << Byte("pushreturnvalue");
 					bytecode << Byte("pushbackref");
 				}
+				else if (istack.back().getInstruction() == "ifstatement" && tokens.at(i + 1).getType() == TT::LCURLYBRACE) {
+					istack.pop();
+					bytecode << Byte("pop");
+					bytecode << Byte("jumpfalse");
+					istack << Instruction("ifstatementjump", std::to_string(bytecode.size() - 1));
+					i += 2;
+					continue;
+				}
+				else if (istack.back().getInstruction() == "whilestatement" && tokens.at(i + 1).getType() == TT::LCURLYBRACE) {
+					std::string pos = istack.back().getData();
+					istack.pop();
+					bytecode << Byte("pop");
+					bytecode << Byte("jumpfalse");
+					istack << Instruction("whilestatementloop", pos);
+					istack << Instruction("whilestatementjump", std::to_string(bytecode.size() - 1));
+					i += 2;
+					continue;
+				}
 				i += 1;
 			}
 			else if (type == TT::FUNCTION) {
@@ -485,6 +522,18 @@ namespace sda
 					bytecode << Byte("endclass", istack.back().getData());
 					istack.pop();
 				}
+				else if (istack.back().getInstruction() == "ifstatementjump") {
+					size_t index = std::stoi(istack.back().getData());
+					bytecode.at(index).setData(std::to_string(bytecode.size() - 1));
+					istack.pop();
+				}
+				else if (istack.back().getInstruction() == "whilestatementjump") {
+					size_t index = std::stoi(istack.back().getData());
+					istack.pop();
+					bytecode << Byte("jump", istack.back().getData());
+					bytecode.at(index).setData(std::to_string(bytecode.size() - 1));
+					istack.pop();
+				}
 				i += 1;
 			}
 			else if (type == TT::RETURN) {
@@ -508,7 +557,24 @@ namespace sda
 				}
 				i += 1;
 			}
+			else if (tokens.at(i).getType() == TT::LBRACKET) {
+				bytecode << Byte("newparamstack");
+				istack << Instruction("functioncall", "concat");
+				if (tokens.at(i + 2).getType() == TT::RBRACKET) {
+					bytecode << Byte("newstack");
+					bytecode << Byte("call", "concat");
+					bytecode << Byte("popparamstack");
+					bytecode << Byte("popstack");
+					istack.pop();
+					bytecode << Byte("pushreturnvalue");
+					bytecode << Byte("pushbackref");
+					i += 2;
+					continue;
+				}
+				i += 1;
+				continue;
+			}
 		}
-		this->optimise();
+		//this->optimise();
 	}
 }
