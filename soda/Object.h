@@ -18,6 +18,7 @@ namespace sda
 	public:
 		std::vector<Name>& getMembers();
 		Name& getMember(size_t index);
+		Class getClass();
 		Object(Class cls);
 	};
 }

@@ -238,6 +238,7 @@ namespace sda
 			T("!=", TT::NOTEQUALTO),
 			T("&&", TT::AND),
 			T("||", TT::OR),
+			T("^^", TT::XOR),
 			T("!", TT::NOT),
 			T("&", TT::BITWISEAND),
 			T("|", TT::BITWISEOR),

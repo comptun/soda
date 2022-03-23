@@ -10,6 +10,10 @@ namespace sda
 	{
 		return this->members.at(index);
 	}
+	Class Object::getClass()
+	{
+		return this->cls;
+	}
 
 	Object::Object(Class cls)
 	{

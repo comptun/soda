@@ -79,7 +79,23 @@ namespace sda
 			type == TT::BITWISEXOR ||
 			type == TT::LEFTSHIFT ||
 			type == TT::RIGHTSHIFT ||
-			type == TT::DOUBLESTAR;
+			type == TT::DOUBLESTAR ||
+			type == TT::EQUALTO ||
+			type == TT::AND ||
+			type == TT::OR ||
+			type == TT::XOR;
+	}
+
+	bool Translator::isBoolOperator(TT type)
+	{
+		return type == TT::EQUALTO;
+	}
+
+	bool Translator::isSpecialBoolOperator(TT type)
+	{
+		return type == TT::AND ||
+			type == TT::OR ||
+			type == TT::XOR;
 	}
 
 	void Translator::optimise()
@@ -183,6 +199,18 @@ namespace sda
 					bytecode << Byte("pop");
 					istack.pop();
 				}
+				if (istack.back().getInstruction() == "booloperator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				if (istack.back().getInstruction() == "specialbooloperator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
 				if (istack.back().getInstruction() == "listindex") {
 					bytecode << Byte("pop");
 					bytecode << Byte("pushlistindex");
@@ -193,6 +221,18 @@ namespace sda
 			}
 			else if (type == TT::SEMICOLON) {
 				if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				if (istack.back().getInstruction() == "booloperator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				if (istack.back().getInstruction() == "specialbooloperator") {
 					bytecode << Byte("pop");
 					bytecode << Byte(istack.back().getData());
 					bytecode << Byte("pop");
@@ -269,16 +309,8 @@ namespace sda
 						bytecode << Byte("popparamstack");
 						bytecode << Byte("popstack");
 						istack.pop();
-						if (istack.back().getInstruction() == "operator") {
-							bytecode << Byte("pushreturnvalue");
-							bytecode << Byte(istack.back().getData());
-							bytecode << Byte("pop");
-							istack.pop();
-						}
-						else {
-							bytecode << Byte("pushreturnvalue");
-							bytecode << Byte("pushbackref");
-						}
+						bytecode << Byte("pushreturnvalue");
+						bytecode << Byte("pushbackref");
 						i += 3;
 						continue;
 					}
@@ -311,6 +343,19 @@ namespace sda
 					bytecode << Byte("pop");
 					istack.pop();
 				}
+				if (istack.back().getInstruction() == "booloperator" && (isBoolOperator(type) || isSpecialBoolOperator(type))) {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				if (istack.back().getInstruction() == "specialbooloperator" && isSpecialBoolOperator(type)) {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				
 				if (type == TT::ADD)
 					istack << Instruction("operator", "add");
 				else if (type == TT::SUBTRACT)
@@ -331,10 +376,30 @@ namespace sda
 					istack << Instruction("operator", "rshift");
 				else if (type == TT::DOUBLESTAR)
 					istack << Instruction("operator", "pow");
+				else if (type == TT::EQUALTO)
+					istack << Instruction("booloperator", "equalto");
+				else if (type == TT::AND)
+					istack << Instruction("specialbooloperator", "booland");
+				else if (type == TT::OR)
+					istack << Instruction("specialbooloperator", "boolor");
+				else if (type == TT::XOR)
+					istack << Instruction("specialbooloperator", "boolxor");
 				i += 1;
 			}
 			else if (type == TT::COMMA) {
 				if (istack.back().getInstruction() == "operator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				if (istack.back().getInstruction() == "booloperator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				if (istack.back().getInstruction() == "specialbooloperator") {
 					bytecode << Byte("pop");
 					bytecode << Byte(istack.back().getData());
 					bytecode << Byte("pop");
@@ -360,6 +425,18 @@ namespace sda
 					bytecode << Byte("pop");
 					istack.pop();
 				}
+				if (istack.back().getInstruction() == "booloperator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
+				if (istack.back().getInstruction() == "specialbooloperator") {
+					bytecode << Byte("pop");
+					bytecode << Byte(istack.back().getData());
+					bytecode << Byte("pop");
+					istack.pop();
+				}
 				if (istack.back().getInstruction() == "functionparams") {
 					if (tokens.at(i + 1).getType() == TT::LCURLYBRACE) {
 						std::string funcname = istack.back().getData();
@@ -370,22 +447,18 @@ namespace sda
 					}
 				}
 				else if (istack.back().getInstruction() == "functioncall") {
-					bytecode << Byte("pop");
-					bytecode << Byte("pushparam");
-					bytecode << Byte("pop");
+					if (tokens.at(i - 1).getType() != TT::LBRACKET) {
+						bytecode << Byte("pop");
+						bytecode << Byte("pushparam");
+						bytecode << Byte("pop");
+					}
 					bytecode << Byte("newstack");
 					bytecode << Byte("call", istack.back().getData());
 					bytecode << Byte("popparamstack");
 					bytecode << Byte("popstack");
 					istack.pop();
-					if (istack.back().getInstruction() == "operator") {
-						bytecode << Byte("pushreturnvalue");
-						bytecode << Byte("pushbackref");
-					}
-					else {
-						bytecode << Byte("pushreturnvalue");
-						bytecode << Byte("pushbackref");
-					}
+					bytecode << Byte("pushreturnvalue");
+					bytecode << Byte("pushbackref");
 				}
 				i += 1;
 			}

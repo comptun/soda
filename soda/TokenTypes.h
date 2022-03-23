@@ -40,6 +40,7 @@ namespace sda
 		NOTEQUALTO,
 		AND,
 		OR,
+		XOR,
 		NOT,
 		BITWISEAND,
 		BITWISEOR,

@@ -41,6 +41,9 @@ namespace sda
 		void bytecode(LIST bc);
 		void push(STACK& stack, LIST list, TYPE item);
 		void pop(LIST list);
+		void size(LIST& list);
+		void to_list(TYPE& type);
+		void clone(STACK& stack, Object& obj);
 
 	public:
 		TYPE getReturnValue();

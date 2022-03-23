@@ -105,6 +105,24 @@ namespace sda
 		RETURN = list;
 	}
 
+	void PrecompiledFunctions::size(LIST& list)
+	{
+		RETURN = static_cast<INT>(list.size());
+	}
+
+	void PrecompiledFunctions::to_list(TYPE& type)
+	{
+		if (std::holds_alternative<STRING>(type)) {
+
+		}
+	}
+
+	void PrecompiledFunctions::clone(STACK& stack, Object& obj)
+	{
+		std::vector<Name> members = obj.getMembers();
+		Object newObject(obj.getClass());
+	}
+
 	PrecompiledFunctions::TYPE PrecompiledFunctions::getReturnValue()
 	{
 		return this->RETURN;
@@ -141,7 +159,7 @@ namespace sda
 			this->endl();
 			return true;
 		}
-		else if (name == "list") {
+		else if (name == "array") {
 			this->list(params, stack);
 			return true;
 		}
@@ -168,7 +186,10 @@ namespace sda
 			this->pop(std::get<LIST>(params.at(0)));
 			return true;
 		}
-
+		else if (name == "len") {
+			this->size(std::get<LIST>(params.at(0)));
+			return true;
+		}
 		return false;
 	}
 }

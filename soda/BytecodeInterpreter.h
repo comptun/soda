@@ -67,6 +67,8 @@ namespace sda
 		void pushnewobject(std::string const& className);
 		void pushmember(std::string const& name);
 
+		// Arithematic Operators
+
 		void add();
 		void sub();
 		void mul();
@@ -78,6 +80,14 @@ namespace sda
 		void lshift();
 		void rshift();
 		void power();
+
+		// Boolean Operators
+
+		void equalto();
+
+		void booland();
+		void boolor();
+		void boolxor();
 
 	public:
 
