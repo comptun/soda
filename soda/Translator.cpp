@@ -179,7 +179,7 @@ namespace sda
 					bytecode << Byte("pop");
 					if (tokens.at(i + 3).getType() == TT::RBRACKET) {
 						bytecode << Byte("newstack");
-						bytecode << Byte("call", tokens.at(i + 1).getName());
+						bytecode << Byte("callmember", tokens.at(i + 1).getName());
 						bytecode << Byte("popparamstack");
 						bytecode << Byte("popstack");
 						bytecode << Byte("pushreturnvalue");
@@ -187,7 +187,7 @@ namespace sda
 						i += 4;
 					}
 					else {
-						istack << Instruction("functioncall", tokens.at(i + 1).getName());
+						istack << Instruction("functioncallmember", tokens.at(i + 1).getName());
 						i += 3;
 					}
 				}
@@ -295,9 +295,12 @@ namespace sda
 				}
 				else if (istack.back().getInstruction() == "functionparams") {
 					if (tokens.at(i + 1).getType() == TT::LBRACKET) {
-						bytecode << Byte("function", name);
 						if (istack.at(istack.size() - 2).getInstruction() == "classdef") {
+							bytecode << Byte("function", "___CLASS___" + istack.at(istack.size() - 2).getData() + "___" + name);
 							bytecode << Byte("varparam", "this");
+						}
+						else {
+							bytecode << Byte("function", name);
 						}
 						i += 2;
 						continue;
@@ -435,6 +438,11 @@ namespace sda
 					bytecode << Byte("pushparam");
 					bytecode << Byte("pop");
 				}
+				if (istack.back().getInstruction() == "functioncallmember") {
+					bytecode << Byte("pop");
+					bytecode << Byte("pushparam");
+					bytecode << Byte("pop");
+				}
 				i += 1;
 			}
 			else if (type == TT::RBRACKET) {
@@ -473,6 +481,20 @@ namespace sda
 					}
 					bytecode << Byte("newstack");
 					bytecode << Byte("call", istack.back().getData());
+					bytecode << Byte("popparamstack");
+					bytecode << Byte("popstack");
+					istack.pop();
+					bytecode << Byte("pushreturnvalue");
+					bytecode << Byte("pushbackref");
+				}
+				else if (istack.back().getInstruction() == "functioncallmember") {
+					if (tokens.at(i - 1).getType() != TT::LBRACKET) {
+						bytecode << Byte("pop");
+						bytecode << Byte("pushparam");
+						bytecode << Byte("pop");
+					}
+					bytecode << Byte("newstack");
+					bytecode << Byte("callmember", istack.back().getData());
 					bytecode << Byte("popparamstack");
 					bytecode << Byte("popstack");
 					istack.pop();

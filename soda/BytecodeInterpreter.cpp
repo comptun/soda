@@ -570,6 +570,10 @@ namespace sda
 					continue;
 				}
 			}
+			else if (opcode == "callmember") {
+				js.push_back(i);
+				i = std::get<INT>(this->stack.at(1).at(this->getName("___CLASS___" + std::get<Object>(this->params.back().at(0)).getClass().getName() + "___" + data).reference().address())) - 1;
+			}
 			else if (opcode == "newstack") {
 				this->newstack();
 				this->newnames();
@@ -606,7 +610,7 @@ namespace sda
 				this->boolxor();
 			}
 			else if (opcode == "jumpfalse") {
-				if (!std::get<INT>(stack.back().back())) {
+				if (!std::get<INT>(this->tracebackReference(stack.back().back()))) {
 					i = std::stoi(data);
 				}
 				stack.back().pop_back();

@@ -10,7 +10,7 @@ namespace sda
 		translate(getTokens()); 
 		std::cout << getBytecode();
 		interpret(getBytecode());
-		std::cin.get();
+		//std::cin.get();
 		return 1;
 	}
 }
