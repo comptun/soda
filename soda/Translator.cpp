@@ -82,7 +82,9 @@ namespace sda
 			type == TT::RIGHTSHIFT ||
 			type == TT::DOUBLESTAR ||
 			type == TT::EQUALTO ||
+			type == TT::NOTEQUALTO ||
 			type == TT::LESSTHAN ||
+			type == TT::LESSTHANEQUALTO ||
 			type == TT::AND ||
 			type == TT::OR ||
 			type == TT::XOR;
@@ -398,6 +400,10 @@ namespace sda
 					istack << Instruction("booloperator", "equalto");
 				else if (type == TT::LESSTHAN)
 					istack << Instruction("booloperator", "lessthan");
+				else if (type == TT::NOTEQUALTO)
+					istack << Instruction("booloperator", "notequalto");
+				else if (type == TT::LESSTHANEQUALTO)
+					istack << Instruction("booloperator", "lessthanequalto");
 
 
 				else if (type == TT::AND)

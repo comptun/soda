@@ -10,7 +10,7 @@ namespace sda
 	class Soda : public Lexer, public Translator, public BytecodeInterpreter
 	{
 	public:
-		int main();
+		int main(const std::string& filePath);
 	};
 }
 

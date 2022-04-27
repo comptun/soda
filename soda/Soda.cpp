@@ -2,13 +2,13 @@
 
 namespace sda
 {
-	int Soda::main()
+	int Soda::main(const std::string& filePath)
 	{
 		srand((unsigned)time(0));
 
-		lex("main.soda");
-		translate(getTokens()); 
-		std::cout << getBytecode();
+		lex(filePath);
+		translate(getTokens());
+		//std::cout << getBytecode();
 		interpret(getBytecode());
 		//std::cin.get();
 		return 1;
